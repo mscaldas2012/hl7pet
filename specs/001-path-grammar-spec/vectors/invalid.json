@@ -1,0 +1,50 @@
+[
+  {
+    "id": "invalid-seg-firstchar",
+    "path": "9BC-1",
+    "message_ref": "messages/baseline.hl7",
+    "method": "getValue",
+    "expected": "INVALID",
+    "grammar_productions": ["SEG"]
+  },
+  {
+    "id": "invalid-segidx-token",
+    "path": "PID[ABC]-1",
+    "message_ref": "messages/baseline.hl7",
+    "method": "getValue",
+    "expected": "INVALID",
+    "grammar_productions": ["SEG_IDX"]
+  },
+  {
+    "id": "invalid-fieldidx-token",
+    "path": "OBX-5[ABC]",
+    "message_ref": "messages/baseline.hl7",
+    "method": "getValue",
+    "expected": "INVALID",
+    "grammar_productions": ["FIELD_IDX"]
+  },
+  {
+    "id": "invalid-operator-token",
+    "path": "OBX[@3=='9945-3']-5",
+    "message_ref": "messages/baseline.hl7",
+    "method": "getValue",
+    "expected": "INVALID",
+    "grammar_productions": ["FILTER", "OPERATOR"]
+  },
+  {
+    "id": "invalid-wrong-separator",
+    "path": "OBX[1].5",
+    "message_ref": "messages/baseline.hl7",
+    "method": "getValue",
+    "expected": "INVALID",
+    "grammar_productions": ["PATH"]
+  },
+  {
+    "id": "invalid-unterminated-filter",
+    "path": "OBX[@3.1='9945-3]-5",
+    "message_ref": "messages/baseline.hl7",
+    "method": "getValue",
+    "expected": "INVALID",
+    "grammar_productions": ["FILTER"]
+  }
+]

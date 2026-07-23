@@ -1,0 +1,50 @@
+# --- Rust ---
+target/
+**/*.rs.bk
+*.pdb
+
+# --- Python (bindings/python) ---
+__pycache__/
+*.py[cod]
+*.so
+.Python
+.venv/
+venv/
+env/
+build/
+dist/
+wheels/
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- Java / SBT (bindings/java) ---
+.bsp/
+.metals/
+.bloop/
+project/target/
+project/project/
+
+# --- IDE ---
+.idea/
+.vscode/
+*.iml
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Logs / env ---
+*.log
+.env
+.env.*
+!.env.example
+
+# --- Claude Code / Spec Kit local-only state ---
+# Personal, machine-specific permission allowlist -- not shared project config.
+.claude/settings.local.json
+# Per-session "which feature is currently active" pointer -- would conflict
+# constantly across contributors working on different specs simultaneously.
+.specify/feature.json
