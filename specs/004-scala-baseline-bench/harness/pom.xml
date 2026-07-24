@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>gov.cdc.hl7.bench</groupId>
+  <artifactId>scala-baseline-harness</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>hl7-pet Scala Baseline Benchmark Harness</name>
+  <description>
+    Benchmarks the current Scala HL7-PET engine (gov.cdc:hl7-pet_2.13, resolved as a
+    normal Maven dependency - see specs/004-scala-baseline-bench/spec.md FR-002) and
+    commits the results as a versioned baseline for the Rust core migration to compare
+    against later.
+  </description>
+
+  <properties>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <jmh.version>1.37</jmh.version>
+    <scala-library.version>2.13.13</scala-library.version>
+    <jackson.version>2.17.2</jackson.version>
+    <junit.version>5.10.3</junit.version>
+
+    <!-- Single source of truth for the benchmarked engine's coordinate, so
+         ManifestWriter doesn't hardcode a copy that can drift from the actual
+         <dependency> below - see the exec-maven-plugin systemProperties. -->
+    <hl7pet.groupId>gov.cdc</hl7pet.groupId>
+    <hl7pet.artifactId>hl7-pet_2.13</hl7pet.artifactId>
+    <hl7pet.version>1.2.11</hl7pet.version>
+    <hl7pet.coordinate>${hl7pet.groupId}:${hl7pet.artifactId}:${hl7pet.version}</hl7pet.coordinate>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- Pinned explicitly so it doesn't silently drift from whatever version
+           gov.cdc:hl7-pet_2.13:1.2.11 happens to declare transitively (research.md #2). -->
+      <dependency>
+        <groupId>org.scala-lang</groupId>
+        <artifactId>scala-library</artifactId>
+        <version>${scala-library.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <!-- The benchmark target itself: resolved from Maven Central, no vendored source,
+         no local filesystem path - see spec.md FR-002 and research.md #2. -->
+    <dependency>
+      <groupId>${hl7pet.groupId}</groupId>
+      <artifactId>${hl7pet.artifactId}</artifactId>
+      <version>${hl7pet.version}</version>
+    </dependency>
+
+    <!-- JMH: drives every benchmark in ParsingBenchmarks / ExtractionBenchmarks
+         (research.md #1). -->
+    <dependency>
+      <groupId>org.openjdk.jmh</groupId>
+      <artifactId>jmh-core</artifactId>
+      <version>${jmh.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjdk.jmh</groupId>
+      <artifactId>jmh-generator-annprocess</artifactId>
+      <version>${jmh.version}</version>
+    </dependency>
+
+    <!-- Used by Corpus (corpus-manifest.json) and ManifestWriter (manifest.json). -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+
+    <!-- Harness wiring smoke check only (T008) - not exhaustive engine-correctness
+         coverage, which is Roadmap spec 003's responsibility. -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>scala-baseline-harness</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.openjdk.jmh</groupId>
+              <artifactId>jmh-generator-annprocess</artifactId>
+              <version>${jmh.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+      </plugin>
+      <!-- BenchmarkRunner (T011) drives JMH programmatically via OptionsBuilder, so no
+           shaded "benchmarks.jar" is needed - just run it on the normal compile +
+           dependency classpath: mvn compile exec:exec (T012).
+           Uses exec:exec (a real "java" subprocess), not exec:java (in-process, via
+           Maven's own classloader): JMH's own benchmark forking spawns child JVMs that
+           reconstruct their classpath from java.class.path, which exec:java never sets
+           to the project's dependency classpath - only exec:exec's real subprocess does. -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <executable>java</executable>
+          <arguments>
+            <argument>-classpath</argument>
+            <classpath/>
+            <argument>-Dhl7pet.coordinate=${hl7pet.coordinate}</argument>
+            <argument>gov.cdc.hl7.bench.BenchmarkRunner</argument>
+          </arguments>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

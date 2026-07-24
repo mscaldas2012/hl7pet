@@ -1,0 +1,167 @@
+{
+  "corpusId": "interim-v1",
+  "messages": [
+    {
+      "messageId": "adt_a01_001",
+      "messageType": "ADT^A01",
+      "sizeCategory": "typical",
+      "filePath": "adt_a01_001.hl7"
+    },
+    {
+      "messageId": "adt_a08_002",
+      "messageType": "ADT^A08",
+      "sizeCategory": "typical",
+      "filePath": "adt_a08_002.hl7"
+    },
+    {
+      "messageId": "oru_r01_003",
+      "messageType": "ORU^R01",
+      "sizeCategory": "typical",
+      "filePath": "oru_r01_003.hl7"
+    },
+    {
+      "messageId": "vxu_v04_004",
+      "messageType": "VXU^V04",
+      "sizeCategory": "typical",
+      "filePath": "vxu_v04_004.hl7"
+    },
+    {
+      "messageId": "orm_o01_005",
+      "messageType": "ORM^O01",
+      "sizeCategory": "typical",
+      "filePath": "orm_o01_005.hl7"
+    },
+    {
+      "messageId": "adt_a01_006",
+      "messageType": "ADT^A01",
+      "sizeCategory": "typical",
+      "filePath": "adt_a01_006.hl7"
+    },
+    {
+      "messageId": "adt_a08_007",
+      "messageType": "ADT^A08",
+      "sizeCategory": "typical",
+      "filePath": "adt_a08_007.hl7"
+    },
+    {
+      "messageId": "oru_r01_008",
+      "messageType": "ORU^R01",
+      "sizeCategory": "typical",
+      "filePath": "oru_r01_008.hl7"
+    },
+    {
+      "messageId": "vxu_v04_009",
+      "messageType": "VXU^V04",
+      "sizeCategory": "typical",
+      "filePath": "vxu_v04_009.hl7"
+    },
+    {
+      "messageId": "orm_o01_010",
+      "messageType": "ORM^O01",
+      "sizeCategory": "typical",
+      "filePath": "orm_o01_010.hl7"
+    },
+    {
+      "messageId": "adt_a01_011",
+      "messageType": "ADT^A01",
+      "sizeCategory": "typical",
+      "filePath": "adt_a01_011.hl7"
+    },
+    {
+      "messageId": "adt_a08_012",
+      "messageType": "ADT^A08",
+      "sizeCategory": "typical",
+      "filePath": "adt_a08_012.hl7"
+    },
+    {
+      "messageId": "oru_r01_013",
+      "messageType": "ORU^R01",
+      "sizeCategory": "typical",
+      "filePath": "oru_r01_013.hl7"
+    },
+    {
+      "messageId": "vxu_v04_014",
+      "messageType": "VXU^V04",
+      "sizeCategory": "typical",
+      "filePath": "vxu_v04_014.hl7"
+    },
+    {
+      "messageId": "orm_o01_015",
+      "messageType": "ORM^O01",
+      "sizeCategory": "typical",
+      "filePath": "orm_o01_015.hl7"
+    },
+    {
+      "messageId": "adt_a01_016",
+      "messageType": "ADT^A01",
+      "sizeCategory": "typical",
+      "filePath": "adt_a01_016.hl7"
+    },
+    {
+      "messageId": "adt_a08_017",
+      "messageType": "ADT^A08",
+      "sizeCategory": "typical",
+      "filePath": "adt_a08_017.hl7"
+    },
+    {
+      "messageId": "oru_r01_018",
+      "messageType": "ORU^R01",
+      "sizeCategory": "typical",
+      "filePath": "oru_r01_018.hl7"
+    },
+    {
+      "messageId": "vxu_v04_019",
+      "messageType": "VXU^V04",
+      "sizeCategory": "typical",
+      "filePath": "vxu_v04_019.hl7"
+    },
+    {
+      "messageId": "orm_o01_020",
+      "messageType": "ORM^O01",
+      "sizeCategory": "typical",
+      "filePath": "orm_o01_020.hl7"
+    },
+    {
+      "messageId": "adt_a01_021",
+      "messageType": "ADT^A01",
+      "sizeCategory": "typical",
+      "filePath": "adt_a01_021.hl7"
+    },
+    {
+      "messageId": "adt_a08_022",
+      "messageType": "ADT^A08",
+      "sizeCategory": "typical",
+      "filePath": "adt_a08_022.hl7"
+    },
+    {
+      "messageId": "oru_r01_023",
+      "messageType": "ORU^R01",
+      "sizeCategory": "typical",
+      "filePath": "oru_r01_023.hl7"
+    },
+    {
+      "messageId": "vxu_v04_024",
+      "messageType": "VXU^V04",
+      "sizeCategory": "typical",
+      "filePath": "vxu_v04_024.hl7"
+    },
+    {
+      "messageId": "orm_o01_025",
+      "messageType": "ORM^O01",
+      "sizeCategory": "typical",
+      "filePath": "orm_o01_025.hl7"
+    },
+    {
+      "messageId": "oru_r01_large_026",
+      "messageType": "ORU^R01",
+      "sizeCategory": "large-high-repetition",
+      "filePath": "oru_r01_large_026.hl7"
+    },
+    {
+      "messageId": "adt_a01_minimal_027",
+      "messageType": "ADT^A01",
+      "sizeCategory": "minimal",
+      "filePath": "adt_a01_minimal_027.hl7"
+    }
+  ]
+}
