@@ -1,0 +1,102 @@
+[
+  {
+    "id": "path-msh12",
+    "path": "MSH-12",
+    "message_ref": "messages/baseline.hl7",
+    "method": "getFirstValue",
+    "expected": "2.5.1",
+    "expected_lines": [1],
+    "grammar_productions": ["PATH", "SEGMENT_EXPR", "SEG", "FIELD_EXPR", "field_num"]
+  },
+  {
+    "id": "path-obx5-occurrences",
+    "path": "OBX-5",
+    "message_ref": "messages/multi-obx.hl7",
+    "method": "getValue",
+    "expected": [["Positive"], ["Negative"], ["Equivocal"]],
+    "expected_lines": [[4], [5], [6]],
+    "grammar_productions": ["PATH", "SEGMENT_EXPR", "SEG", "FIELD_EXPR", "field_num"]
+  },
+  {
+    "id": "path-segidx-number",
+    "path": "PID[1]-5",
+    "message_ref": "messages/baseline.hl7",
+    "method": "getValue",
+    "expected": [["SYNTHETIC^PATIENT^A"]],
+    "expected_lines": [[2]],
+    "grammar_productions": ["SEGMENT_EXPR", "SEG_IDX"]
+  },
+  {
+    "id": "path-segidx-last",
+    "path": "OBX[$LAST]-5",
+    "message_ref": "messages/multi-obx.hl7",
+    "method": "getValue",
+    "expected": [["Equivocal"]],
+    "expected_lines": [[6]],
+    "grammar_productions": ["SEGMENT_EXPR", "SEG_IDX"]
+  },
+  {
+    "id": "path-segidx-star",
+    "path": "OBX[*]-5",
+    "message_ref": "messages/multi-obx.hl7",
+    "method": "getValue",
+    "expected": [["Positive"], ["Negative"], ["Equivocal"]],
+    "expected_lines": [[4], [5], [6]],
+    "grammar_productions": ["SEGMENT_EXPR", "SEG_IDX"]
+  },
+  {
+    "id": "path-filter-single-clause",
+    "path": "OBX[@3.1='94500-6']-5",
+    "message_ref": "messages/filter-example.hl7",
+    "method": "getValue",
+    "expected": [["Positive"]],
+    "expected_lines": [[4]],
+    "grammar_productions": ["SEGMENT_EXPR", "SEG_IDX", "FILTER", "OPERATOR", "field_num", "comp_num"],
+    "known_limitation": "single-clause-filter"
+  },
+  {
+    "id": "path-fieldexpr-subcomp",
+    "path": "OBR-4.2.2",
+    "message_ref": "messages/baseline.hl7",
+    "method": "getFirstValue",
+    "expected": "Extended",
+    "expected_lines": [3],
+    "grammar_productions": ["FIELD_EXPR", "field_num", "comp_num", "subcomp_num"]
+  },
+  {
+    "id": "path-fieldidx-repetition-all",
+    "path": "OBX-5",
+    "message_ref": "messages/multi-repetition.hl7",
+    "method": "getValue",
+    "expected": [["IgG", "IgM"]],
+    "expected_lines": [[4, 4]],
+    "grammar_productions": ["FIELD_EXPR", "field_num"]
+  },
+  {
+    "id": "path-fieldidx-specific",
+    "path": "OBX-5[2]",
+    "message_ref": "messages/multi-repetition.hl7",
+    "method": "getValue",
+    "expected": [["IgM"]],
+    "expected_lines": [[4]],
+    "grammar_productions": ["FIELD_EXPR", "FIELD_IDX", "field_num"]
+  },
+  {
+    "id": "path-childpath-hierarchy",
+    "path": "OBR[1] -> OBX-5",
+    "message_ref": "messages/multi-obx.hl7",
+    "method": "getValue",
+    "flags": {"hierarchyMode": true, "profile": "DefaultProfile.json"},
+    "expected": [["Positive"], ["Negative"], ["Equivocal"]],
+    "expected_lines": [[4], [5], [6]],
+    "grammar_productions": ["PATH", "CHILD_PATH", "SEGMENT_EXPR", "SEG", "FIELD_EXPR", "field_num"]
+  },
+  {
+    "id": "path-zero-values-nonexistent",
+    "path": "XYZ-99",
+    "message_ref": "messages/baseline.hl7",
+    "method": "getValue",
+    "expected": null,
+    "grammar_productions": ["PATH", "SEGMENT_EXPR", "SEG", "FIELD_EXPR", "field_num"]
+  }
+]
