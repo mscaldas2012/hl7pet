@@ -1,0 +1,52 @@
+[
+  {
+    "id": "hier-001",
+    "path": "OBR[1] -> OBX-3",
+    "profile_ref": "profiles/basic-two-level.json",
+    "message_ref": "messages/basic-hierarchy.hl7",
+    "method": "getValue",
+    "expected": [
+      ["OBX-P-CODE^First Observation^LN"],
+      ["OBX-Q-CODE^Second Observation^LN"]
+    ],
+    "expected_lines": [[5], [6]],
+    "semantic_rules": ["A.2-single-hop-basic"]
+  },
+  {
+    "id": "hier-002",
+    "path": "OBR[1] -> OBX-3",
+    "profile_ref": "profiles/basic-two-level.json",
+    "message_ref": "messages/basic-hierarchy.hl7",
+    "method": "getValue",
+    "flags": { "buildHierarchy": false },
+    "expected": null,
+    "semantic_rules": ["A.5-static-mode-fallback"],
+    "known_limitation": "A.5-static-mode-fallback"
+  },
+  {
+    "id": "hier-003",
+    "path": "OBR[1] -> OBX-3",
+    "profile_ref": "profiles/basic-two-level.json",
+    "message_ref": "messages/unrecognized-segment.hl7",
+    "method": "getValue",
+    "expected": [
+      ["OBX-P-CODE^First Observation^LN"],
+      ["OBX-Q-CODE^Second Observation^LN"]
+    ],
+    "expected_lines": [[5], [6]],
+    "semantic_rules": ["A.1-unrecognized-segment-dropped"]
+  },
+  {
+    "id": "hier-004",
+    "path": "OBR[1] -> OBX[1]-3",
+    "profile_ref": "profiles/basic-two-level.json",
+    "message_ref": "messages/basic-hierarchy.hl7",
+    "method": "getValue",
+    "expected": [
+      ["OBX-Q-CODE^Second Observation^LN"]
+    ],
+    "expected_lines": [[6]],
+    "semantic_rules": ["A.4-cross-parent-child-indexing"],
+    "known_limitation": "A.4-cross-parent-child-indexing"
+  }
+]

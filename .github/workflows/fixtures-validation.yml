@@ -1,0 +1,25 @@
+name: fixtures validation
+
+on:
+  push:
+    paths:
+      - "fixtures/**"
+  pull_request:
+    paths:
+      - "fixtures/**"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install validator dependencies
+        run: pip install -r fixtures/scripts/requirements.txt
+
+      - name: Validate fixtures/ corpus
+        run: python3 fixtures/scripts/validate_corpus.py

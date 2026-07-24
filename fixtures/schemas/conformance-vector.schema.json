@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mscaldas2012/hl7pet/specs/001-path-grammar-spec/contracts/conformance-vector.schema.json",
+  "title": "HL7-PET PATH Conformance Vector",
+  "description": "Schema for a single conformance vector as defined by spec 001-path-grammar-spec FR-011. Consumed programmatically by spec 003 (regression-suite) when vectors are promoted into the shared fixtures/ corpus.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "path", "message_ref", "method", "expected", "grammar_productions"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable, unique identifier for this vector within the whole suite, e.g. \"path-001\". Used for cross-referencing by later specs (e.g. 1000, 1001 reusing this spec's line-number metadata).",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "path": {
+      "type": "string",
+      "description": "The PATH expression under test, exactly as a caller would pass it (e.g. \"OBX[2]-5.1\")."
+    },
+    "message_ref": {
+      "type": "string",
+      "description": "Relative path (from this spec's directory) to the synthetic source HL7 message file this vector is evaluated against. MUST point to a message satisfying FR-009 (no real patient data)."
+    },
+    "method": {
+      "type": "string",
+      "enum": ["getValue", "getFirstValue"],
+      "description": "Which extraction method/variant this vector exercises."
+    },
+    "flags": {
+      "type": "object",
+      "description": "Method-specific flags, e.g. { \"removeEmpty\": true }.",
+      "additionalProperties": true
+    },
+    "expected": {
+      "description": "Expected result. For getValue: a two-dimensional array (outer = segment occurrences, inner = field repetitions), per spec FR-004. For getFirstValue: a single string, or null if no match. For a syntactically invalid path (FR-012): the literal string \"INVALID\".",
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        { "type": "string" },
+        { "type": "null" }
+      ]
+    },
+    "expected_lines": {
+      "description": "1-based source line number for each value in `expected`, mirroring its shape (FR-008). Omitted for invalid-PATH vectors, since no value is extracted.",
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": 1 }
+          }
+        },
+        {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 1 }
+        }
+      ]
+    },
+    "grammar_productions": {
+      "type": "array",
+      "description": "Which grammar production(s) from spec FR-001 this vector exercises (drives SC-003 coverage tracking). For invalid vectors, names the production(s) whose constraint is violated.",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "PATH", "SEGMENT_EXPR", "SEG", "SEG_IDX", "FILTER", "OPERATOR",
+          "FIELD_EXPR", "FIELD_IDX", "CHILD_PATH", "field_num", "comp_num", "subcomp_num"
+        ]
+      }
+    },
+    "known_limitation": {
+      "description": "Name of the SPEC.md §7 Known Limitation this vector demonstrates, if any.",
+      "oneOf": [
+        { "type": "string" },
+        { "type": "null" }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "method": { "const": "getFirstValue" } }
+      },
+      "then": {
+        "properties": {
+          "expected": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "null" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "expected": { "const": "INVALID" } }
+      },
+      "then": {
+        "not": { "required": ["expected_lines"] }
+      }
+    }
+  ]
+}
