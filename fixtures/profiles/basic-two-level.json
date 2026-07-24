@@ -1,0 +1,23 @@
+{
+  "segmentDefinition": {
+    "MSH": {
+      "cardinality": "[1..1]",
+      "children": {
+        "PID": {
+          "cardinality": "[1..1]"
+        },
+        "ORC": {
+          "cardinality": "[0..*]"
+        },
+        "OBR": {
+          "cardinality": "[1..*]",
+          "children": {
+            "OBX": {
+              "cardinality": "[0..*]"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mscaldas2012/hl7pet/specs/002-hierarchy-semantics/contracts/hierarchy-conformance-vector.schema.json",
+  "title": "HL7-PET Hierarchy Conformance Vector",
+  "description": "Schema for a single hierarchy-mode conformance vector, as defined by spec 002-hierarchy-semantics FR-007. Extends spec 001's conformance-vector.schema.json (path, message_ref, method, flags, expected, expected_lines, grammar_productions all carry the same meaning) with a required profile_ref and a semantic_rule field replacing grammar_productions' coverage-tracking role for hierarchy-specific rules. Consumed programmatically by spec 003 (regression-suite) when vectors are promoted into the shared fixtures/ corpus.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "path", "profile_ref", "message_ref", "method", "expected", "semantic_rules"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable, unique identifier for this vector within the whole suite, e.g. \"hier-001\". Distinct namespace from spec 001's path-* ids.",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "path": {
+      "type": "string",
+      "description": "The PATH expression under test, using the '->' hierarchy operator (e.g. \"OBR[1] -> OBX-5\")."
+    },
+    "profile_ref": {
+      "type": "string",
+      "description": "Relative path (from this spec's directory) to the synthetic segmentDefinition profile this vector is evaluated against. MUST be a profile committed under profiles/, never a real jurisdiction-specific profile from the external Scala repo."
+    },
+    "message_ref": {
+      "type": "string",
+      "description": "Relative path (from this spec's directory) to the synthetic source HL7 message file this vector is evaluated against. MUST point to a message satisfying FR-012 (no real patient data)."
+    },
+    "method": {
+      "type": "string",
+      "enum": ["getValue", "getFirstValue"],
+      "description": "Which extraction method/variant this vector exercises."
+    },
+    "flags": {
+      "type": "object",
+      "description": "Method-specific flags, e.g. { \"removeEmpty\": true }.",
+      "additionalProperties": true
+    },
+    "expected": {
+      "description": "Expected result. For getValue: a two-dimensional array (outer = matching child occurrences, inner = field repetitions), per contracts/hierarchy-semantics.md Section A.2. For getFirstValue: a single string, or null if no match.",
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        { "type": "string" },
+        { "type": "null" }
+      ]
+    },
+    "expected_lines": {
+      "description": "1-based source line number for each value in `expected`, mirroring its shape, matching spec 001 FR-008's convention.",
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": 1 }
+          }
+        },
+        {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 1 }
+        }
+      ]
+    },
+    "semantic_rules": {
+      "type": "array",
+      "description": "Which rule(s) from contracts/hierarchy-semantics.md this vector exercises (drives spec SC-003 coverage tracking).",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "A.1-nearest-enclosing-ancestor",
+          "A.1-unrecognized-segment-dropped",
+          "A.2-single-hop-basic",
+          "A.2-zero-children",
+          "A.2-multi-parent-combined-children",
+          "A.3-cardinality-not-enforced-by-navigation",
+          "A.4-cross-parent-child-indexing",
+          "A.5-static-mode-fallback",
+          "A.6-chained-arrow-silently-empty",
+          "B.2-multi-level-navigation"
+        ]
+      }
+    },
+    "known_limitation": {
+      "description": "Name of the contracts/hierarchy-semantics.md Documented Limitation this vector demonstrates, if any (e.g. \"A.4-cross-parent-child-indexing\").",
+      "oneOf": [
+        { "type": "string" },
+        { "type": "null" }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "method": { "const": "getFirstValue" } }
+      },
+      "then": {
+        "properties": {
+          "expected": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "null" }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

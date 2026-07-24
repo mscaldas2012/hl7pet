@@ -1,0 +1,72 @@
+[
+  {
+    "id": "hier-005",
+    "path": "OBR[1] -> OBX-3",
+    "profile_ref": "profiles/deep-nested.json",
+    "message_ref": "messages/complex-hierarchy.hl7",
+    "method": "getValue",
+    "expected": [
+      ["OBX-A-CODE^Direct Child A^LN"],
+      ["OBX-C-CODE^Direct Child C^LN"]
+    ],
+    "expected_lines": [[7], [8]],
+    "semantic_rules": ["A.1-nearest-enclosing-ancestor", "A.2-single-hop-basic"]
+  },
+  {
+    "id": "hier-006",
+    "path": "OBR -> OBX-3",
+    "profile_ref": "profiles/deep-nested.json",
+    "message_ref": "messages/complex-hierarchy.hl7",
+    "method": "getValue",
+    "expected": [
+      ["OBX-A-CODE^Direct Child A^LN"],
+      ["OBX-C-CODE^Direct Child C^LN"]
+    ],
+    "expected_lines": [[7], [8]],
+    "semantic_rules": ["A.2-multi-parent-combined-children"]
+  },
+  {
+    "id": "hier-007",
+    "path": "OBR[2] -> OBX-3",
+    "profile_ref": "profiles/deep-nested.json",
+    "message_ref": "messages/complex-hierarchy.hl7",
+    "method": "getValue",
+    "expected": [],
+    "semantic_rules": [
+      "A.2-zero-children",
+      "A.3-cardinality-not-enforced-by-navigation"
+    ]
+  },
+  {
+    "id": "hier-008",
+    "path": "OBR[1] -> OBX[1]-3",
+    "profile_ref": "profiles/deep-nested.json",
+    "message_ref": "messages/complex-hierarchy.hl7",
+    "method": "getValue",
+    "expected": [],
+    "semantic_rules": ["A.4-cross-parent-child-indexing"],
+    "known_limitation": "A.4-cross-parent-child-indexing"
+  },
+  {
+    "id": "hier-009",
+    "path": "OBR[1] -> OBX[3] -> NTE-3",
+    "profile_ref": "profiles/deep-nested.json",
+    "message_ref": "messages/complex-hierarchy.hl7",
+    "method": "getValue",
+    "expected": null,
+    "semantic_rules": ["A.6-chained-arrow-silently-empty"],
+    "known_limitation": "A.6-chained-arrow-silently-empty"
+  },
+  {
+    "id": "hier-010",
+    "path": "OBR[1] -> OBX[3] -> NTE-3",
+    "profile_ref": "profiles/deep-nested.json",
+    "message_ref": "messages/complex-hierarchy.hl7",
+    "method": "getValue",
+    "expected": [
+      ["Note attached to OBX-C, not to OBR directly"]
+    ],
+    "expected_lines": [[9]],
+    "semantic_rules": ["B.2-multi-level-navigation"]
+  }
+]
