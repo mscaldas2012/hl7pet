@@ -120,6 +120,7 @@ rediscover each decision independently.
 | Spec # | Module    | Short name          | Status |
 |--------|-----------|----------------------|--------|
 | 001    | Rust Core | `path-grammar-spec`  | Complete — grammar finalized (`contracts/path-grammar.md`), 17 conformance vectors authored and verified against the real Scala library with zero discrepancies, scope boundary vs. spec `002` cross-referenced. Ready for spec `006` (Rust PATH parser) to build against. |
+| 002    | Rust Core | `hierarchy-semantics` | Complete — `contracts/hierarchy-semantics.md` documents `segmentDefinition`-driven nearest-enclosing-ancestor tree construction, single-hop `->` evaluation, and the `None`-vs-`Some(empty)` result-shape distinction, all verified against the real Scala source (a local checkout, not just `SPEC.md` prose) and against 9/9 verifiable conformance vectors (`hier-001`–`hier-009`) with zero discrepancies. Also found and documented a real, apparently-untested engine limitation: numeric child indices in `->` (e.g. `OBX[2]`) are unfiltered by type and un-rebased (no `-1` adjustment), confirmed exactly against the real library. Both deferred decisions resolved: profile required but no eager full-tree build (FR-004); multi-level chaining recommended as a Backward-Compatible Addition to spec `001`'s `CHILD_PATH`, gated on a falsifiable O(message size) performance claim (FR-005) — spec `001`'s grammar doc cross-references this. Ready for spec `008` (Rust lazy hierarchy navigation) to build against. |
 
 ## Notes
 

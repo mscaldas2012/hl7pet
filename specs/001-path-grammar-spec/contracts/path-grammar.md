@@ -119,6 +119,15 @@ session:
   cardinality) are explicitly out of scope — owned by spec `002`. This grammar only
   defines `->` as a syntax token in the `PATH` production. See `../spec.md`'s
   Assumptions section and User Story 3 for why this boundary is drawn here.
+  **Update (spec `002`)**: spec `002`'s `contracts/hierarchy-semantics.md` Section
+  B.2 has since proposed recommending a Backward-Compatible Addition to
+  `CHILD_PATH` above — an optional recursive `| SEGMENT_EXPR " -> " CHILD_PATH`
+  alternative, enabling multi-hop chains like `ORC[1] -> OBR[1] -> OBX-5` — gated on
+  a falsifiable performance claim, not yet implemented. This grammar file is not
+  updated in place for it, to keep spec `001`'s own deliverable (verified against
+  the current Scala engine, per that spec's SC-004) unchanged; whichever spec
+  actually implements the addition (likely `008`) should update `CHILD_PATH` here
+  when it lands, rather than leaving the two documents to drift.
 - **Whitespace handling around `->`** is left to spec `002`, since it's a
   hierarchy-mode-only construct and this spec found no evidence in the source that
   it needs the same treatment as `FILTER`'s `OPERATOR`.
