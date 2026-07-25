@@ -125,5 +125,55 @@
     "expected": [["Positive"]],
     "expected_lines": [[4]],
     "grammar_productions": ["SEGMENT_EXPR", "SEG_IDX", "FILTER", "OPERATOR", "field_num", "comp_num"]
+  },
+  {
+    "id": "path-segment-only",
+    "path": "PID",
+    "message_ref": "messages/baseline.hl7",
+    "method": "getValue",
+    "expected": [["PID|1||SYN00001^^^FAKEFACILITY^MR||SYNTHETIC^PATIENT^A||19800101|M"]],
+    "expected_lines": [[2]],
+    "grammar_productions": ["PATH", "SEGMENT_EXPR", "SEG"]
+  },
+  {
+    "id": "path-segidx-out-of-range",
+    "path": "OBX[5]-5",
+    "message_ref": "messages/multi-obx.hl7",
+    "method": "getValue",
+    "expected": null,
+    "grammar_productions": ["SEGMENT_EXPR", "SEG_IDX", "FIELD_EXPR", "field_num"]
+  },
+  {
+    "id": "path-fieldidx-out-of-range",
+    "path": "OBX-5[5]",
+    "message_ref": "messages/multi-repetition.hl7",
+    "method": "getValue",
+    "expected": null,
+    "grammar_productions": ["FIELD_EXPR", "FIELD_IDX", "field_num"]
+  },
+  {
+    "id": "path-filter-no-match",
+    "path": "OBX[@3.1='NO-SUCH-CODE']-5",
+    "message_ref": "messages/multi-obx.hl7",
+    "method": "getValue",
+    "expected": null,
+    "grammar_productions": ["SEGMENT_EXPR", "SEG_IDX", "FILTER", "OPERATOR", "field_num", "comp_num"]
+  },
+  {
+    "id": "path-filter-multi-match",
+    "path": "OBX[@11='F']-5",
+    "message_ref": "messages/multi-obx.hl7",
+    "method": "getValue",
+    "expected": [["Positive"], ["Negative"], ["Equivocal"]],
+    "expected_lines": [[4], [5], [6]],
+    "grammar_productions": ["SEGMENT_EXPR", "SEG_IDX", "FILTER", "OPERATOR", "field_num"]
+  },
+  {
+    "id": "path-filter-nonnumeric-ordering",
+    "path": "OBX[@5>'100']-5",
+    "message_ref": "messages/multi-obx.hl7",
+    "method": "getValue",
+    "expected": "ERROR:NonNumericComparison",
+    "grammar_productions": ["SEGMENT_EXPR", "SEG_IDX", "FILTER", "OPERATOR", "field_num"]
   }
 ]

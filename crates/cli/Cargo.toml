@@ -1,0 +1,11 @@
+[package]
+name = "hl7pet-cli"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "hl7pet"
+path = "src/main.rs"
+
+[dependencies]
+hl7pet-core = { path = "../core" }
