@@ -46,5 +46,13 @@
     "method": "getValue",
     "expected": "INVALID",
     "grammar_productions": ["FILTER"]
+  },
+  {
+    "id": "invalid-multihop-hierarchy",
+    "path": "ORC[1] -> OBR[1] -> OBX-5",
+    "message_ref": "messages/baseline.hl7",
+    "method": "getValue",
+    "expected": "INVALID",
+    "grammar_productions": ["PATH", "CHILD_PATH"]
   }
 ]

@@ -239,38 +239,7 @@ fn is_recognizable_segment_name(name: &[u8]) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::alloc::{GlobalAlloc, Layout, System};
-    use std::cell::Cell;
-
-    thread_local! {
-        static ALLOC_COUNT: Cell<usize> = const { Cell::new(0) };
-    }
-
-    struct CountingAllocator;
-
-    unsafe impl GlobalAlloc for CountingAllocator {
-        unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-            ALLOC_COUNT.with(|c| c.set(c.get() + 1));
-            System.alloc(layout)
-        }
-        unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-            System.dealloc(ptr, layout)
-        }
-        unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
-            ALLOC_COUNT.with(|c| c.set(c.get() + 1));
-            System.realloc(ptr, layout, new_size)
-        }
-    }
-
-    #[global_allocator]
-    static GLOBAL: CountingAllocator = CountingAllocator;
-
-    fn count_allocs(f: impl FnOnce()) -> usize {
-        ALLOC_COUNT.with(|c| c.get()); // touch the thread-local once so first-access lazy init happens outside the measured window
-        let before = ALLOC_COUNT.with(|c| c.get());
-        f();
-        ALLOC_COUNT.with(|c| c.get()) - before
-    }
+    use crate::test_alloc::count_allocs;
 
     // T014 (US1, SC-004): allocation count is independent of field/component/
     // repetition count — it varies only with segment count.
