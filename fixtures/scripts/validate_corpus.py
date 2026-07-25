@@ -13,6 +13,7 @@ from jsonschema import Draft202012Validator
 KNOWN_FAMILIES = {
     "path": "conformance-vector.schema.json",
     "hierarchy": "hierarchy-conformance-vector.schema.json",
+    "scanner": "scanner-conformance-vector.schema.json",
 }
 
 # Coverage dimensions: which field on a vector record names the productions/rules

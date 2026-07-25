@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mscaldas2012/hl7pet/specs/005-message-scanner/contracts/scanner-conformance-vector.schema.json",
+  "title": "HL7-PET Scanner Conformance Vector",
+  "description": "Schema for a single message-scanner conformance vector, as defined by spec 005-message-scanner FR-010. Distinct vector family from spec 001's path-* and spec 002's hier-* vectors (spec 003 FR-007 extensibility) since it exercises scan() (offsets/errors) rather than PATH evaluation. Consumed programmatically by fixtures/scripts/validate_corpus.py once registered there, and by crates/core/tests/scanner_vectors.rs. Promoted directly into fixtures/vectors/scanner/ per spec 003 FR-008 (no per-spec vectors/ copy).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "message_ref"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable, unique identifier for this vector within the whole corpus, e.g. \"scan-001\". Distinct namespace from path-* and hier-* ids.",
+      "pattern": "^scan-[a-z0-9][a-z0-9-]*$"
+    },
+    "message_ref": {
+      "type": "string",
+      "description": "Relative path (from fixtures/) to the synthetic source HL7 message file this vector scans. MUST point to a message satisfying spec 001 FR-009 (no real patient data).",
+      "pattern": "^messages/"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable note on what this vector demonstrates, e.g. \"non-standard field separator (#)\" or \"truncated MSH-2\"."
+    },
+    "expected_delimiters": {
+      "type": "object",
+      "description": "Present on success vectors only. The DelimiterSet the scanner MUST resolve from this message's own MSH-1/MSH-2 (data-model.md DelimiterSet), each given as the literal single character.",
+      "additionalProperties": false,
+      "required": ["field", "component", "repetition", "escape", "subcomponent"],
+      "properties": {
+        "field": { "type": "string", "minLength": 1, "maxLength": 1 },
+        "component": { "type": "string", "minLength": 1, "maxLength": 1 },
+        "repetition": { "type": "string", "minLength": 1, "maxLength": 1 },
+        "escape": { "type": "string", "minLength": 1, "maxLength": 1 },
+        "subcomponent": { "type": "string", "minLength": 1, "maxLength": 1 }
+      }
+    },
+    "expected_segments": {
+      "type": "array",
+      "description": "Present on success vectors only. One entry per segment, in message order, giving its byte offset span (data-model.md SegmentSpan). Offsets are 0-based byte offsets into message_ref's file content.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["start", "end"],
+        "properties": {
+          "start": { "type": "integer", "minimum": 0 },
+          "end": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "expected_delimiter_occurrences": {
+      "type": "array",
+      "description": "Optional even on success vectors — full occurrence-list assertions are only required for the vector(s) specifically targeting DelimiterOccurrence correctness (spec.md User Story 1 Acceptance Scenario 2); most vectors only need expected_segments/expected_delimiters. Ascending offset order (data-model.md).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["segment_index", "offset", "kind"],
+        "properties": {
+          "segment_index": { "type": "integer", "minimum": 0 },
+          "offset": { "type": "integer", "minimum": 0 },
+          "kind": {
+            "type": "string",
+            "enum": ["Field", "Component", "Repetition", "Escape", "Subcomponent"]
+          }
+        }
+      }
+    },
+    "expected_error": {
+      "type": "object",
+      "description": "Present on malformed-MSH vectors only, mutually exclusive with the expected_* success fields (see allOf below). Mirrors data-model.md's ScanError.",
+      "additionalProperties": false,
+      "required": ["kind", "offset"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["MissingMsh", "TruncatedMsh", "UnrecognizedSegment"]
+        },
+        "offset": { "type": "integer", "minimum": 0 },
+        "segment_index": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Required when kind is UnrecognizedSegment (data-model.md); absent otherwise."
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "required": ["expected_error"] },
+      "then": {
+        "not": { "anyOf": [
+          { "required": ["expected_delimiters"] },
+          { "required": ["expected_segments"] },
+          { "required": ["expected_delimiter_occurrences"] }
+        ] }
+      }
+    },
+    {
+      "if": { "not": { "required": ["expected_error"] } },
+      "then": { "required": ["expected_delimiters", "expected_segments"] }
+    },
+    {
+      "if": {
+        "properties": { "expected_error": { "properties": { "kind": { "const": "UnrecognizedSegment" } } } },
+        "required": ["expected_error"]
+      },
+      "then": {
+        "properties": { "expected_error": { "required": ["kind", "offset", "segment_index"] } }
+      }
+    }
+  ]
+}

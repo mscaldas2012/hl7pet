@@ -1,0 +1,34 @@
+[
+  {
+    "id": "scan-003",
+    "message_ref": "messages/scanner-non-standard-delimiters.hl7",
+    "description": "Non-standard field separator (#) and encoding characters (@%!$) read from this message's own MSH-1/MSH-2, fixing SPEC.md §7's 'MSH-1/MSH-2 must be standard' limitation (spec 005 User Story 2, SC-002).",
+    "expected_delimiters": {
+      "field": "#",
+      "component": "@",
+      "repetition": "%",
+      "escape": "!",
+      "subcomponent": "$"
+    },
+    "expected_segments": [
+      { "start": 0, "end": 81 },
+      { "start": 82, "end": 125 }
+    ]
+  },
+  {
+    "id": "scan-004",
+    "message_ref": "messages/scanner-msh1-collision.hl7",
+    "description": "MSH-1 ($) also reappears as MSH-2's subcomponent character, proving MSH-1/MSH-2 are read positionally (fixed byte offsets 3 and 4-7) rather than by searching for a character, so the coincidental repeat causes no ambiguity (spec 005 User Story 2 Acceptance Scenario 3).",
+    "expected_delimiters": {
+      "field": "$",
+      "component": "@",
+      "repetition": "%",
+      "escape": "!",
+      "subcomponent": "$"
+    },
+    "expected_segments": [
+      { "start": 0, "end": 23 },
+      { "start": 24, "end": 36 }
+    ]
+  }
+]
