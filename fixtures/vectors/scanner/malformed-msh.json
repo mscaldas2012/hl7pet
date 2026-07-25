@@ -1,0 +1,26 @@
+[
+  {
+    "id": "scan-005",
+    "message_ref": "messages/scanner-empty.hl7",
+    "description": "Empty message has no MSH segment to read delimiters from (spec 005 Edge Cases, FR-006).",
+    "expected_error": { "kind": "MissingMsh", "offset": 0 }
+  },
+  {
+    "id": "scan-006",
+    "message_ref": "messages/scanner-no-msh.hl7",
+    "description": "Message does not begin with the 3-character segment name MSH (spec 005 FR-006 condition 1, User Story 3 Acceptance Scenario 1).",
+    "expected_error": { "kind": "MissingMsh", "offset": 0 }
+  },
+  {
+    "id": "scan-007",
+    "message_ref": "messages/scanner-truncated-msh2.hl7",
+    "description": "MSH segment ends (at byte 6) before a complete 4-character MSH-2 is present -- only 2 of 4 encoding characters given (spec 005 FR-006 condition 2, User Story 3 Acceptance Scenario 2).",
+    "expected_error": { "kind": "TruncatedMsh", "offset": 6 }
+  },
+  {
+    "id": "scan-008",
+    "message_ref": "messages/scanner-bad-segment-name.hl7",
+    "description": "Well-formed MSH followed by a segment named '999', which fails spec 001's SEG grammar rule (alphabetic-led) at byte 13, segment index 1 (spec 005 FR-006 condition 3, User Story 3 Acceptance Scenario 3).",
+    "expected_error": { "kind": "UnrecognizedSegment", "offset": 13, "segment_index": 1 }
+  }
+]

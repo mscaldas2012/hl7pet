@@ -1,0 +1,49 @@
+[
+  {
+    "id": "scan-001",
+    "message_ref": "messages/scanner-multi-segment.hl7",
+    "description": "Multi-segment standard-delimiter message exercising all field/component/repetition/escape/subcomponent characters across different segments (spec 005 User Story 1).",
+    "expected_delimiters": {
+      "field": "|",
+      "component": "^",
+      "repetition": "~",
+      "escape": "\\",
+      "subcomponent": "&"
+    },
+    "expected_segments": [
+      { "start": 0, "end": 81 },
+      { "start": 82, "end": 125 },
+      { "start": 126, "end": 165 },
+      { "start": 166, "end": 221 }
+    ]
+  },
+  {
+    "id": "scan-002",
+    "message_ref": "messages/scanner-delimiter-occurrences.hl7",
+    "description": "Small two-segment message with hand-verified offsets for every delimiter occurrence, covering all five DelimiterKind variants within a single segment (spec 005 User Story 1 Acceptance Scenario 2).",
+    "expected_delimiters": {
+      "field": "|",
+      "component": "^",
+      "repetition": "~",
+      "escape": "\\",
+      "subcomponent": "&"
+    },
+    "expected_segments": [
+      { "start": 0, "end": 12 },
+      { "start": 13, "end": 24 }
+    ],
+    "expected_delimiter_occurrences": [
+      { "segment_index": 0, "offset": 3, "kind": "Field" },
+      { "segment_index": 0, "offset": 4, "kind": "Component" },
+      { "segment_index": 0, "offset": 5, "kind": "Repetition" },
+      { "segment_index": 0, "offset": 6, "kind": "Escape" },
+      { "segment_index": 0, "offset": 7, "kind": "Subcomponent" },
+      { "segment_index": 0, "offset": 8, "kind": "Field" },
+      { "segment_index": 0, "offset": 10, "kind": "Field" },
+      { "segment_index": 1, "offset": 16, "kind": "Field" },
+      { "segment_index": 1, "offset": 18, "kind": "Component" },
+      { "segment_index": 1, "offset": 20, "kind": "Repetition" },
+      { "segment_index": 1, "offset": 22, "kind": "Subcomponent" }
+    ]
+  }
+]

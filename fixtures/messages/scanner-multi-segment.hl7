@@ -1,0 +1,4 @@
+MSH|^~\&|SENDAPP|SENDFAC|RECVAPP|RECVFAC|20260101120000||ADT^A01|MSG00001|P|2.5.1
+PID|1||12345^^^MRN||Doe^John~Smith^Jane|||M
+NTE|1||Backslash test \T\ escape marker
+OBX|1|ST|CODE^Label^LN|1|Value1&Value2^Sub1&Sub2||||||F
