@@ -98,5 +98,32 @@
     "method": "getValue",
     "expected": null,
     "grammar_productions": ["PATH", "SEGMENT_EXPR", "SEG", "FIELD_EXPR", "field_num"]
+  },
+  {
+    "id": "path-filter-orvalues",
+    "path": "OBX[@3.1='94500-6||85477-8']-5",
+    "message_ref": "messages/filter-example.hl7",
+    "method": "getValue",
+    "expected": [["Positive"], ["Negative"]],
+    "expected_lines": [[4], [5]],
+    "grammar_productions": ["SEGMENT_EXPR", "SEG_IDX", "FILTER", "OPERATOR", "field_num", "comp_num"]
+  },
+  {
+    "id": "path-filter-subcomponent",
+    "path": "OBR[@4.2.2='Extended']-4.1",
+    "message_ref": "messages/baseline.hl7",
+    "method": "getValue",
+    "expected": [["94500-6"]],
+    "expected_lines": [[3]],
+    "grammar_productions": ["SEGMENT_EXPR", "SEG_IDX", "FILTER", "OPERATOR", "field_num", "comp_num", "subcomp_num"]
+  },
+  {
+    "id": "path-filter-operator-whitespace",
+    "path": "OBX[@3.1 = '94500-6']-5",
+    "message_ref": "messages/filter-example.hl7",
+    "method": "getValue",
+    "expected": [["Positive"]],
+    "expected_lines": [[4]],
+    "grammar_productions": ["SEGMENT_EXPR", "SEG_IDX", "FILTER", "OPERATOR", "field_num", "comp_num"]
   }
 ]
