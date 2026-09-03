@@ -83,7 +83,7 @@ pub fn execute<'m>(
 /// explicit `Numeric`/`Last` index beyond what's present yields zero
 /// candidates, not an error (research.md #2, verified against the real Scala
 /// engine).
-fn resolve_segment_candidates<'m>(
+pub(crate) fn resolve_segment_candidates<'m>(
     scan: &ScanResult<'m>,
     segment_name: &str,
     index: Option<&SegIndex<'_>>,
@@ -121,7 +121,7 @@ fn resolve_segment_candidates<'m>(
 /// Evaluates `clause` against one candidate segment occurrence's content,
 /// reusing `extract_component`'s field/component/subcomponent navigation
 /// (research.md #3 — one navigation path, not two).
-fn filter_matches<'m>(
+pub(crate) fn filter_matches<'m>(
     scan: &ScanResult<'m>,
     span: &SegmentSpan,
     clause: &FilterClause<'_>,
@@ -179,7 +179,7 @@ fn filter_matches<'m>(
 /// Resolves the value(s) `field_expr` addresses within one matched segment
 /// occurrence. `None` (no field expression) returns the full raw segment
 /// content, unsplit, as a single-element vec (FR-002, research.md #5).
-fn resolve_field_values<'m>(
+pub(crate) fn resolve_field_values<'m>(
     field_expr: Option<&FieldExpr>,
     segment_content: &'m str,
     segment_name: &str,

@@ -72,6 +72,10 @@ pub struct FieldExpr {
 /// not recursive: the grammar's `CHILD_PATH` production is single-hop only
 /// (`contracts/path-grammar.md` Non-Goals) — a second `" -> "` is rejected
 /// with [`ParseErrorKind::MultipleHierarchyHops`], not represented in the type.
+/// Spec 008 (`hl7pet_core::hierarchy`), the spec `path-grammar.md`'s Non-Goals
+/// named as the likely place to add multi-hop chaining, considered and
+/// explicitly deferred it instead (spec 008's Clarifications) — this type
+/// stays non-recursive until a future spec revisits that decision.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChildPath<'a> {
     pub segment: SegmentExpr<'a>,
