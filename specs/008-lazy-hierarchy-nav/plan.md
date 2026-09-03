@@ -77,12 +77,15 @@ where a borrowed slice suffices (Constitution Principle II, same as spec `007`).
 (FR-014).
 
 **Scale/Scope**: Operates on one `(ScanResult, CompiledPath, HierarchyProfile)` tuple
-per call. Validated against `fixtures/vectors/hierarchy/basic.json` (4 vectors) and
-`complex.json` (6 vectors) — 10 total; 8 are in scope for this spec, 2 of which
-(`hier-004`, `hier-008`) have their `expected`/`expected_lines`/`known_limitation`
-fields corrected (research.md #4) to reflect FR-007's fix rather than the original
-Scala bug. The remaining 2 (`hier-009`, `hier-010`) use a two-hop PATH testing the
-multi-hop capability this spec defers — discovered during implementation to be
+per call. Validated against `fixtures/vectors/hierarchy/basic.json` (5 vectors,
+including this spec's own `hier-011` addition) and `complex.json` (6 vectors) — 11
+total; 9 are in scope for this spec, 2 of which (`hier-004`, `hier-008`) have their
+`expected`/`expected_lines`/`known_limitation` fields corrected (research.md #4) to
+reflect FR-007's fix rather than the original Scala bug, and one (`hier-011`) is a
+new vector added specifically to prove parent-scoped isolation between two `OBR`
+occurrences, which the original corpus had no vector for. The remaining 2
+(`hier-009`, `hier-010`) use a two-hop PATH testing the multi-hop capability this
+spec defers — discovered during implementation to be
 unparseable under this spec's unchanged grammar, excluded from the validating test
 suite with the exclusion documented (research.md #6), not silently miscounted.
 

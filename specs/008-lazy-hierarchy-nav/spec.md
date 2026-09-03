@@ -85,11 +85,14 @@ proof it matches the documented compatibility floor (spec `002`,
 Constitution Principle I) is not verifiably correct, regardless of whether it
 compiles and runs.
 
-**Independent Test**: Run the 8 single-hop vectors in
-`fixtures/vectors/hierarchy/` (10 total, minus `hier-009`/`hier-010`) end-to-
-end (scan → parse → hierarchy-execute) and confirm 8/8 match their
+**Independent Test**: Run the 9 single-hop vectors in
+`fixtures/vectors/hierarchy/` (11 total, minus `hier-009`/`hier-010`) end-to-
+end (scan → parse → hierarchy-execute) and confirm 9/9 match their
 documented `expected` value, including the vectors whose `expected` is
-`null` (static-mode fallback, zero children).
+`null` (static-mode fallback, zero children), and including `hier-011`'s
+explicit proof that two `OBR` occurrences' children are correctly isolated
+from each other (`basic-hierarchy.hl7` extended with a second `OBR` and its
+own `OBX` children specifically to make this checkable).
 
 **Acceptance Scenarios**:
 
@@ -98,9 +101,9 @@ documented `expected` value, including the vectors whose `expected` is
    **Then** the result is empty, matching spec `002` Section A.5's documented
    fallback behavior.
 2. **Given** every single-hop vector in `fixtures/vectors/hierarchy/basic.json`
-   and `complex.json` (8 of the 10 — `hier-009`/`hier-010` excluded per this
+   and `complex.json` (9 of the 11 — `hier-009`/`hier-010` excluded per this
    story's scope), **When** each is executed against its `message_ref` and
-   `profile_ref`, **Then** all 8 reproduce their `expected`/`expected_lines`
+   `profile_ref`, **Then** all 9 reproduce their `expected`/`expected_lines`
    exactly.
 
 ---
@@ -235,9 +238,10 @@ navigation (User Stories 1/2) is implemented and validated.
   mode) MUST yield an empty result, matching spec `002` Section A.5's
   documented fallback behavior — the parent and child sides MUST NOT be
   independently evaluated as flat paths.
-- **FR-010**: This module MUST be validated against the 8 single-hop vectors
-  among the 10 existing `fixtures/vectors/hierarchy/` vectors (spec
-  `002`/`003`), reproducing each vector's `expected`/`expected_lines`
+- **FR-010**: This module MUST be validated against the 9 single-hop vectors
+  among the 11 existing `fixtures/vectors/hierarchy/` vectors (spec
+  `002`/`003`/this spec's own `hier-011` addition), reproducing each vector's
+  `expected`/`expected_lines`
   (including the `null`-expected static-mode and unrecognized-segment
   vectors) exactly, before being considered complete. `hier-009`/`hier-010`
   (a two-hop PATH, discovered during implementation to be unparseable under
@@ -300,11 +304,13 @@ navigation (User Stories 1/2) is implemented and validated.
 
 ### Measurable Outcomes
 
-- **SC-001**: 8/8 single-hop vectors among the 10 existing
+- **SC-001**: 9/9 single-hop vectors among the 11 existing
   `fixtures/vectors/hierarchy/` vectors pass end-to-end (scan → parse →
   hierarchy-execute) with output matching their documented
   `expected`/`expected_lines` exactly (`hier-009`/`hier-010`'s two-hop PATH
-  is out of scope, FR-010).
+  is out of scope, FR-010). Includes `hier-011`, which proves parent-scoped
+  isolation directly: two `OBR` occurrences' `OBX` children never leak into
+  each other's result.
 - **SC-002**: For a message and profile of any size, a single-hop hierarchy
   query's work is bounded by the size of the matching parent occurrence(s)'
   scoped line ranges, not the whole message — demonstrated by a dedicated
@@ -338,11 +344,18 @@ navigation (User Stories 1/2) is implemented and validated.
   already implemented and are consumed, not modified — per this spec's
   Clarifications (multi-hop deferred), spec `006`'s `ChildPath` type stays
   non-recursive; no grammar or parser change is in scope here.
-- `fixtures/vectors/hierarchy/` (spec `002`/`003`, 10 vectors, 8 of which are
-  in scope per FR-010) and `fixtures/profiles/{basic-two-level,deep-nested}.json`
-  are the primary conformance target; no new Scala verification is needed for
-  behavior already covered by those vectors, since spec `002` already
-  verified them live against the real Scala engine. `deep-nested.json`
+- `fixtures/vectors/hierarchy/` (spec `002`/`003`, originally 10 vectors, 11
+  after this spec's own `hier-011` addition, 9 of which are in scope per
+  FR-010) and `fixtures/profiles/{basic-two-level,deep-nested}.json` are the
+  primary conformance target; no new Scala verification is needed for
+  behavior already covered by the pre-existing vectors, since spec `002`
+  already verified them live against the real Scala engine. `hier-011` and
+  `messages/basic-hierarchy.hl7`'s second `OBR` occurrence are this spec's
+  own addition (not Scala-verified — the Scala engine's own parent-scoping
+  behavior for this exact case is already established by spec `002` Section
+  A.2 and this spec's `hier-001`/`hier-005` precedents), added specifically
+  because the pre-existing corpus had no vector proving two `OBR`
+  occurrences' children stay isolated from each other. `deep-nested.json`
   legitimately places `OBX` and `NTE` as legal children at more than one
   nesting depth — discovered during implementation to require a design
   correction (research.md #2), not something this spec's design could assume

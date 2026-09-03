@@ -1,11 +1,12 @@
 # Quickstart: Lazy Hierarchy Navigation
 
 Validates spec.md's user stories end-to-end: a single-hop `->` PATH resolves against
-a scanned message and a parsed profile without a full-message tree (US1), the 8
+a scanned message and a parsed profile without a full-message tree (US1), the 9
 single-hop `fixtures/vectors/hierarchy/` vectors pass with FR-007's corrected
-child-index behavior (US2 — 2 of the 10 total vectors use a two-hop PATH and are out
+child-index behavior (US2 — 2 of the 11 total vectors use a two-hop PATH and are out
 of scope, spec.md FR-010/research.md #6), and multi-hop chaining is confirmed still
-rejected at parse time, not silently attempted (US3).
+rejected at parse time, not silently attempted (US3). Includes `hier-011`, added to
+prove parent-scoped isolation between two `OBR` occurrences directly.
 
 ## Prerequisites
 
@@ -48,11 +49,14 @@ case (FR-009).
 cargo test -p hl7pet-core --test hierarchy_vectors
 ```
 
-**Expected outcome**: 8 of the 10 vectors across `basic.json` (4) and `complex.json`
+**Expected outcome**: 9 of the 11 vectors across `basic.json` (5) and `complex.json`
 (6) pass, including the two corrected in this spec (`hier-004`, `hier-008` —
-research.md #4's new `expected` values) and the static-mode-fallback vector
-(`hier-002`, `flags.buildHierarchy: false` → `profile: None` at the call site,
-expecting `Ok(vec![])`). `hier-009`/`hier-010` (a two-hop PATH) are skipped by the
+research.md #4's new `expected` values), `hier-011` (this spec's own addition,
+proving two `OBR` occurrences' children stay isolated — `messages/basic-hierarchy.hl7`
+was extended with a second `OBR` and its own `OBX` children specifically to make
+this checkable), and the static-mode-fallback vector (`hier-002`,
+`flags.buildHierarchy: false` → `profile: None` at the call site, expecting
+`Ok(vec![])`). `hier-009`/`hier-010` (a two-hop PATH) are skipped by the
 harness's `is_multi_hop` filter, documented in the test file — they are out of
 scope, not silently passing (research.md #6). This is the single command that
 proves SC-001.

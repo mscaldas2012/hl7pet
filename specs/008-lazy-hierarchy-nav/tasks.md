@@ -109,28 +109,31 @@ vector.
 
 ## Phase 4: User Story 2 - Existing hierarchy conformance vectors validate the implementation byte-for-byte (Priority: P1)
 
-**Goal**: Prove the 8 single-hop vectors in the existing 10-vector corpus pass
-against this implementation, including the two vectors research.md #4 identified as
-needing `expected`-value corrections under FR-007's fix, and that a malformed
-profile or an unusually large scoped range never panics or scans unboundedly.
+**Goal**: Prove the 9 single-hop vectors in the corpus pass against this
+implementation, including the two vectors research.md #4 identified as needing
+`expected`-value corrections under FR-007's fix, one added specifically to prove
+parent-scoped isolation, and that a malformed profile or an unusually large scoped
+range never panics or scans unboundedly.
 
-**Independent Test**: The 8 single-hop vectors in
+**Independent Test**: The 9 single-hop vectors in
 `fixtures/vectors/hierarchy/{basic,complex}.json` (`hier-009`/`hier-010`'s two-hop
 PATH is out of scope, discovered during T014, research.md #6) pass via
 `cargo test -p hl7pet-core --test hierarchy_vectors`, including the corrected
-entries and the static-mode-fallback vector (spec.md US2 Independent Test, SC-001).
+entries, `hier-011`, and the static-mode-fallback vector (spec.md US2 Independent
+Test, SC-001).
 
 ### Implementation for User Story 2
 
 - [X] T018 [US2] Update `fixtures/vectors/hierarchy/basic.json`'s `hier-004` entry (research.md #4): change `expected` to `[["OBX-P-CODE^First Observation^LN"]]` and `expected_lines` to `[[5]]`; remove the `known_limitation` field entirely (it is no longer a limitation). **Note**: `semantic_rules` is left as `["A.4-cross-parent-child-indexing"]`, not changed to a new value as this task originally specified — the vector still exercises that documented rule, and the schema's closed `semantic_rules` enum needs no new value as a result (research.md #4).
 - [X] T019 [US2] Update `fixtures/vectors/hierarchy/complex.json`'s `hier-008` entry (research.md #4): change `expected` to `[["OBX-A-CODE^Direct Child A^LN"]]` and `expected_lines` to `[[7]]`; remove the `known_limitation` field entirely. Same `semantic_rules` note as T018.
-- [X] T020 [US2] Run `cargo test -p hl7pet-core --test hierarchy_vectors` and confirm all 8 single-hop vectors pass, including T018/T019's corrected entries and `hier-002`'s static-mode-fallback case (`flags.buildHierarchy: false` → `execute_hierarchy(..., None)` → `Ok(vec![])`) — spec.md's US2 Independent Test, proving SC-001. (`hier-009`/`hier-010` are excluded by T014's `is_multi_hop` filter, research.md #6 — not part of this "all pass" count.)
+- [X] T020 [US2] Run `cargo test -p hl7pet-core --test hierarchy_vectors` and confirm all 9 single-hop vectors pass, including T018/T019's corrected entries, T030's new `hier-011`, and `hier-002`'s static-mode-fallback case (`flags.buildHierarchy: false` → `execute_hierarchy(..., None)` → `Ok(vec![])`) — spec.md's US2 Independent Test, proving SC-001. (`hier-009`/`hier-010` are excluded by T014's `is_multi_hop` filter, research.md #6 — not part of this "all pass" count.)
 - [X] T021 [P] [US2] Add unit tests in `crates/core/src/hierarchy.rs` (SC-004): confirm invalid JSON returns `Err(ProfileError::InvalidJson { .. })` from `HierarchyProfile::from_json` — never a panic; confirm (separately) that a profile with a segment type repeated at two positions in `segmentDefinition` (`deep-nested.json`'s real shape) is accepted, not rejected (research.md #2's corrected design — this task's original wording expected a `DuplicateSegmentType` rejection here, which T007 removed once the real fixture data falsified that design).
 - [X] T022 [P] [US2] Add a bounded-scan cost unit test in `crates/core/src/hierarchy.rs` (SC-002): construct a large synthetic message where the matching parent occurrence's real children are a small prefix of the message, and confirm `direct_children_of_type` (T010) never inspects a `SegmentSpan` past the computed boundary line — implemented as a correctness-under-scale test (a 2000-segment tail after the boundary must not appear in or change the result), which falsifies "continues past the boundary" functionally rather than via an allocation/iteration counter.
+- [X] T030 [US2] *(Added after initial implementation, per user request — the corpus had no vector proving two `OBR` occurrences' children stay isolated from each other; `hier-004`'s "second OBX" only tested indexing, not cross-parent leakage.)* Extend `fixtures/messages/basic-hierarchy.hl7` with a second `OBR` occurrence and its own two `OBX` children (appended after the existing content — `hier-001`/`hier-002`/`hier-004`'s line references to the first `OBR`'s children are unaffected). Add `hier-011` to `fixtures/vectors/hierarchy/basic.json`: `"OBR[2] -> OBX-3"`, `semantic_rules: ["A.2-single-hop-basic"]`, expecting only the second `OBR`'s two `OBX` values — directly falsifiable proof that `OBR[1]`'s and `OBR[2]`'s children never leak into each other's result.
 
-**Checkpoint**: User Stories 1 and 2 both independently functional; the 8-vector
-single-hop conformance suite (8/8) passes against the corrected, non-buggy
-implementation.
+**Checkpoint**: User Stories 1 and 2 both independently functional; the 9-vector
+single-hop conformance suite (9/9) passes against the corrected, non-buggy
+implementation, including direct proof of parent-scoped isolation.
 
 ---
 
@@ -313,3 +316,10 @@ planning-vs-implementation corrections rather than silently absorbing them:
   are excluded from `hierarchy_vectors`'s dispatch loop, documented in the test
   file, rather than silently miscounted as passing. SC-001/FR-010's "10 vectors"
   language was corrected to "8 of 10" across spec.md, plan.md, and quickstart.md.
+- **T030** (post-implementation, per user request): the corpus, even after the
+  above, had no vector proving two `OBR` occurrences' children stay isolated from
+  each other — `hier-004`/`hier-008` tested indexing, not cross-parent leakage, and
+  the only message with two `OBR`s (`complex-hierarchy.hl7`) uses a different,
+  deeper profile. Extended `basic-hierarchy.hl7` with a second `OBR`, added
+  `hier-011`. Counts updated again, this time to "9 of 11," across spec.md,
+  plan.md, quickstart.md, and `ROADMAP.md`.

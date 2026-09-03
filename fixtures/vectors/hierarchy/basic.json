@@ -47,5 +47,18 @@
     ],
     "expected_lines": [[5]],
     "semantic_rules": ["A.4-cross-parent-child-indexing"]
+  },
+  {
+    "id": "hier-011",
+    "path": "OBR[2] -> OBX-3",
+    "profile_ref": "profiles/basic-two-level.json",
+    "message_ref": "messages/basic-hierarchy.hl7",
+    "method": "getValue",
+    "expected": [
+      ["OBX-R-CODE^Third Observation^LN"],
+      ["OBX-S-CODE^Fourth Observation^LN"]
+    ],
+    "expected_lines": [[8], [9]],
+    "semantic_rules": ["A.2-single-hop-basic"]
   }
 ]

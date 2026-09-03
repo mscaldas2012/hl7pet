@@ -304,3 +304,37 @@ for that future spec) and this spec's own scope boundary.
   `ParseError` from a wholly different module); asserting a `ParseError` where the
   vector's schema declares a `getValue`/`expected` outcome would be testing the
   wrong thing under a coincidentally-matching label.
+
+## Decision 7: `hier-011` added — the corpus had no vector proving cross-parent isolation
+
+**Decision (post-implementation, per user request)**: `messages/basic-hierarchy.hl7`
+gained a second `OBR` occurrence with its own two `OBX` children, appended after the
+existing content (lines 1-6 unchanged, so `hier-001`/`hier-002`/`hier-004`'s
+`expected_lines` remain valid). `fixtures/vectors/hierarchy/basic.json` gained
+`hier-011`: `"OBR[2] -> OBX-3"`, expecting only the second `OBR`'s two `OBX` values.
+
+**Rationale**: every pre-existing single-`OBR`-per-message vector (`hier-001`,
+`hier-002`, `hier-004`) proves *that* `->` extracts children, but not that it
+*excludes* a sibling parent's children — with only one `OBR` in the message, a
+(hypothetical) implementation that ignored parent-scoping entirely and just
+returned "every `OBX` in the message" would have passed every existing
+`basic-hierarchy.hl7` vector identically. `complex-hierarchy.hl7` does have two
+`OBR`s, but every vector against it uses `deep-nested.json`'s deeper profile,
+entangling this specific question with nested-child exclusion. `hier-011` isolates
+exactly the property in question: `OBR[1]` and `OBR[2]` must return disjoint
+results. Manually confirmed live via the CLI before adding the vector:
+`OBR[1] -> OBX-3` returns the first pair, `OBR[2] -> OBX-3` returns the second pair,
+and unindexed `OBR -> OBX-3` returns all four in document order.
+
+**Alternatives considered**:
+- Add the second `OBR` to a *new* message file instead of extending
+  `basic-hierarchy.hl7`: rejected — `basic-hierarchy.hl7` already exists
+  specifically for `basic-two-level.json`-profile, non-nested scenarios, and
+  appending (not editing in place) is provably non-breaking for every vector
+  already referencing it (confirmed by re-running `hierarchy_vectors` and
+  `scanner_regression` after the edit, both still passing).
+- Give `hier-011` a novel `semantic_rules` tag documenting "cross-parent isolation"
+  specifically: rejected in favor of reusing `"A.2-single-hop-basic"` (already used
+  by `hier-001`) — same schema-avoidance reasoning as Decision 4: no new enum value
+  needed, the vector still exercises that same documented rule, just against a
+  message that can actually falsify a scoping bug.

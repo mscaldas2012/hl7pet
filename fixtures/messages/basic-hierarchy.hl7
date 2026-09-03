@@ -4,3 +4,6 @@ ORC|RE||ORDER0001
 OBR|1|ORDER0001||OBR-BASIC-TEST^Test Panel^LN|||20260101120000
 OBX|1|CE|OBX-P-CODE^First Observation^LN||POS||||||F
 OBX|2|CE|OBX-Q-CODE^Second Observation^LN||NEG||||||F
+OBR|2|ORDER0002||OBR-BASIC-TEST-2^Second Test Panel^LN|||20260101130000
+OBX|1|CE|OBX-R-CODE^Third Observation^LN||POS||||||F
+OBX|2|CE|OBX-S-CODE^Fourth Observation^LN||NEG||||||F
