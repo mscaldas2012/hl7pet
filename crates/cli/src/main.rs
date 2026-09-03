@@ -1,11 +1,12 @@
 //! Quick manual query tool for exercising `hl7pet-core`'s scanner, parser,
-//! and query executor (specs 005-007) from the command line. Not a formal
-//! roadmap feature — a dev tool, not tracked as its own spec.
+//! query executor, and hierarchy navigator (specs 005-008) from the command
+//! line. Not a formal roadmap feature — a dev tool, not tracked as its own
+//! spec.
 //!
-//! Usage: hl7pet <message-file> <path-expr> [--first]
+//! Usage: hl7pet <message-file> <path-expr> [--first] [--profile <file>]
 //!
 //! Exit codes: 0 = match(es) found, 1 = no match, 2 = usage/read/scan/parse/
-//! query error (grep-like convention).
+//! profile/query error (grep-like convention).
 
 use std::process::ExitCode;
 
@@ -13,15 +14,32 @@ fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().collect();
     let program = "hl7pet";
 
-    let positional: Vec<&String> = args[1..].iter().filter(|a| a.as_str() != "--first").collect();
-    let first_only = args[1..].iter().any(|a| a == "--first");
+    let mut positional: Vec<&String> = Vec::new();
+    let mut first_only = false;
+    let mut profile_path: Option<&String> = None;
+    let mut arg_iter = args[1..].iter();
+    while let Some(arg) = arg_iter.next() {
+        match arg.as_str() {
+            "--first" => first_only = true,
+            "--profile" => {
+                profile_path = arg_iter.next();
+                if profile_path.is_none() {
+                    eprintln!("error: --profile requires a value");
+                    return ExitCode::from(2);
+                }
+            }
+            _ => positional.push(arg),
+        }
+    }
 
     let [file_path, path_expr] = positional[..] else {
-        eprintln!("usage: {program} <message-file> <path-expr> [--first]");
+        eprintln!("usage: {program} <message-file> <path-expr> [--first] [--profile <file>]");
         eprintln!();
         eprintln!("  <message-file>  path to a raw HL7 v2 message file");
-        eprintln!("  <path-expr>     a PATH expression, e.g. \"PID-5.1\" or \"OBX[2]-5\"");
+        eprintln!("  <path-expr>     a PATH expression, e.g. \"PID-5.1\", \"OBX[2]-5\", or");
+        eprintln!("                  \"OBR[1] -> OBX-5\" (hierarchy, requires --profile)");
         eprintln!("  --first         print only the first matched value (getFirstValue-style)");
+        eprintln!("  --profile <file>  a segmentDefinition JSON profile, for hierarchy PATHs");
         return ExitCode::from(2);
     };
 
@@ -49,14 +67,27 @@ fn main() -> ExitCode {
         }
     };
 
-    if compiled.child.is_some() {
-        eprintln!(
-            "warning: hierarchy PATH (\"->\") is not evaluated yet (spec 008) — \
-             only the parent segment/field is queried"
-        );
-    }
+    let profile = match profile_path {
+        Some(path) => {
+            let profile_json = match std::fs::read_to_string(path) {
+                Ok(j) => j,
+                Err(e) => {
+                    eprintln!("error reading profile {path}: {e}");
+                    return ExitCode::from(2);
+                }
+            };
+            match hl7pet_core::HierarchyProfile::from_json(&profile_json) {
+                Ok(p) => Some(p),
+                Err(e) => {
+                    eprintln!("profile error: {e}");
+                    return ExitCode::from(2);
+                }
+            }
+        }
+        None => None,
+    };
 
-    let values = match hl7pet_core::execute(&scan_result, &compiled) {
+    let values = match hl7pet_core::execute_hierarchy(&scan_result, &compiled, profile.as_ref()) {
         Ok(v) => v,
         Err(e) => {
             eprintln!("query error: {e}");

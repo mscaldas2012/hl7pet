@@ -43,9 +43,11 @@
     "profile_ref": "profiles/deep-nested.json",
     "message_ref": "messages/complex-hierarchy.hl7",
     "method": "getValue",
-    "expected": [],
-    "semantic_rules": ["A.4-cross-parent-child-indexing"],
-    "known_limitation": "A.4-cross-parent-child-indexing"
+    "expected": [
+      ["OBX-A-CODE^Direct Child A^LN"]
+    ],
+    "expected_lines": [[7]],
+    "semantic_rules": ["A.4-cross-parent-child-indexing"]
   },
   {
     "id": "hier-009",
