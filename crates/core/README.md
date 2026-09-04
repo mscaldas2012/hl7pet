@@ -42,6 +42,32 @@ counting-allocator harness — only one `#[global_allocator]` can exist per
 test binary, so both modules' allocation-count tests (spec 005/006 SC-004)
 call it rather than each declaring their own.
 
+## Performance validation
+
+`benches/` (spec [`009-core-perf-validation`](../../specs/009-core-perf-validation/))
+benchmarks `scan`/`execute`/`execute_hierarchy` against the shared
+`fixtures/messages/perf/` corpus and compares the results against the Scala
+engine's own JMH benchmarks (`specs/004-scala-baseline-bench/harness/`) on
+the same corpus. A hand-written `Instant`-sampling harness, not `criterion` —
+see research.md #2 — with its own standalone allocator (`benches/common/alloc.rs`,
+separate from `src/test_alloc.rs`, since each `cargo bench` target is its own
+binary):
+
+```bash
+cargo bench -p hl7pet-core                                  # writes rust-results-*.json
+python3 specs/009-core-perf-validation/scripts/compare_results.py <run-dir>
+```
+
+See [`../../specs/009-core-perf-validation/quickstart.md`](../../specs/009-core-perf-validation/quickstart.md)
+for the full walkthrough (including the paired Scala run) and
+[`../../specs/009-core-perf-validation/contracts/comparison-artifact-schema.md`](../../specs/009-core-perf-validation/contracts/comparison-artifact-schema.md)
+for the output format. The 2026-09-04 run found the Rust core beats Scala on
+every comparable metric (throughput/latency 2-2600x, allocated bytes/op
+1.2-449x — the extreme end is hierarchy navigation, where Scala rebuilds a
+full parse tree per call and Rust's bounded scan doesn't) — see
+`specs/009-core-perf-validation/tasks.md`'s results summary for the full
+breakdown, and `ROADMAP.md` for the headline numbers.
+
 ## Build and test
 
 ```bash

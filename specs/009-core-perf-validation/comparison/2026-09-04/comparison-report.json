@@ -1,0 +1,1436 @@
+{
+  "runDate": "2026-09-04",
+  "corpusId": "perf-v2",
+  "scalaEngineCoordinate": "gov.cdc:hl7-pet_2.13:1.2.11",
+  "rustEngineVersion": "0.1.0",
+  "hostEnvironment": {
+    "os": "macos",
+    "arch": "aarch64"
+  },
+  "results": [
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PID-5.1",
+      "metric": "throughput",
+      "scalaValue": 0.09761418113379901,
+      "rustValue": 2.4489036258467083,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP50",
+      "scalaValue": 10.416,
+      "rustValue": 0.334,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP95",
+      "scalaValue": 11.536,
+      "rustValue": 0.375,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PID-5.1",
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 12578.112172618055,
+      "rustValue": 1192.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PID-5.1",
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 1176780402.6013823,
+      "rustValue": 2919093122.0092764,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PID-5.1",
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 9.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": "PID-5.1",
+      "metric": "throughput",
+      "scalaValue": 0.1243927852127799,
+      "rustValue": 3.3131452350345225,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP50",
+      "scalaValue": 8.832,
+      "rustValue": 0.29200000000000004,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP95",
+      "scalaValue": 9.456,
+      "rustValue": 0.375,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": "PID-5.1",
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 12033.975215260569,
+      "rustValue": 1192.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": "PID-5.1",
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 1331331099.1834283,
+      "rustValue": 3949269120.161151,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": "PID-5.1",
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 9.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PID-5.1",
+      "metric": "throughput",
+      "scalaValue": 0.09801264468033041,
+      "rustValue": 2.9881430483840123,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP50",
+      "scalaValue": 10.208,
+      "rustValue": 0.33299999999999996,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP95",
+      "scalaValue": 11.152000000000001,
+      "rustValue": 0.334,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PID-5.1",
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 12561.846612216294,
+      "rustValue": 1192.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PID-5.1",
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 1208050019.7867038,
+      "rustValue": 3561866513.673743,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PID-5.1",
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 9.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "PID-5.1",
+      "metric": "throughput",
+      "scalaValue": 0.08088100615334182,
+      "rustValue": 2.911937195338571,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP50",
+      "scalaValue": 12.208,
+      "rustValue": 0.33299999999999996,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP95",
+      "scalaValue": 13.792,
+      "rustValue": 0.41600000000000004,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "PID-5.1",
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 12962.23935244,
+      "rustValue": 1192.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "PID-5.1",
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 1025539186.962671,
+      "rustValue": 3471029136.843577,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "PID-5.1",
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 9.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "PID-5.1",
+      "metric": "throughput",
+      "scalaValue": 0.0677702850553992,
+      "rustValue": 2.8369277207555306,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP50",
+      "scalaValue": 14.912,
+      "rustValue": 0.33299999999999996,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP95",
+      "scalaValue": 16.16,
+      "rustValue": 0.375,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "PID-5.1",
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 13794.607856252296,
+      "rustValue": 1192.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "PID-5.1",
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 913657332.2193695,
+      "rustValue": 3381617843.1405926,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "PID-5.1",
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 9.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "PID-5.1",
+      "metric": "throughput",
+      "scalaValue": 0.06701614999815328,
+      "rustValue": 2.8076480332425526,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP50",
+      "scalaValue": 13.872,
+      "rustValue": 0.33299999999999996,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP95",
+      "scalaValue": 14.656,
+      "rustValue": 0.41600000000000004,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "PID-5.1",
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 13090.294338418875,
+      "rustValue": 1192.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "PID-5.1",
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 941188105.7344186,
+      "rustValue": 3346716455.6251225,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "PID-5.1",
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 9.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PV1-3.1",
+      "metric": "throughput",
+      "scalaValue": 0.19282014000879888,
+      "rustValue": 3.5376941309654364,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PV1-3.1",
+      "metric": "latencyP50",
+      "scalaValue": 5.16,
+      "rustValue": 0.25,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PV1-3.1",
+      "metric": "latencyP95",
+      "scalaValue": 5.5840000000000005,
+      "rustValue": 0.29200000000000004,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PV1-3.1",
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 6107.60185084928,
+      "rustValue": 680.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PV1-3.1",
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 1169922534.683854,
+      "rustValue": 2405632009.0564966,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PV1-3.1",
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 8.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PV1-3.1",
+      "metric": "throughput",
+      "scalaValue": 0.1928674642034555,
+      "rustValue": 3.5523726296793625,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PV1-3.1",
+      "metric": "latencyP50",
+      "scalaValue": 5.248,
+      "rustValue": 0.25,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PV1-3.1",
+      "metric": "latencyP95",
+      "scalaValue": 5.6240000000000006,
+      "rustValue": 0.291,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PV1-3.1",
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 6088.994364198451,
+      "rustValue": 680.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PV1-3.1",
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 1148584499.6642072,
+      "rustValue": 2415613388.1819663,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PV1-3.1",
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 8.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "OBR-4.2",
+      "metric": "throughput",
+      "scalaValue": 0.14530524063714936,
+      "rustValue": 4.873769373233259,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "OBR-4.2",
+      "metric": "latencyP50",
+      "scalaValue": 6.08,
+      "rustValue": 0.20800000000000002,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "OBR-4.2",
+      "metric": "latencyP95",
+      "scalaValue": 6.784,
+      "rustValue": 0.25,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "OBR-4.2",
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 5998.4740289668725,
+      "rustValue": 424.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "OBR-4.2",
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 966330711.8836702,
+      "rustValue": 2066478214.2509017,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "OBR-4.2",
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 7.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "OBX-5",
+      "metric": "throughput",
+      "scalaValue": 0.10275588176873082,
+      "rustValue": 1.6164176305903803,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "OBX-5",
+      "metric": "latencyP50",
+      "scalaValue": 9.696,
+      "rustValue": 0.5419999999999999,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "OBX-5",
+      "metric": "latencyP95",
+      "scalaValue": 10.576,
+      "rustValue": 0.5840000000000001,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "OBX-5",
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 10865.558852368265,
+      "rustValue": 1720.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "OBX-5",
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 1114305893.8923416,
+      "rustValue": 2780238324.615454,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "OBX-5",
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 17.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": "OBX-5",
+      "metric": "throughput",
+      "scalaValue": 0.006807749009690244,
+      "rustValue": 0.06190736083472914,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": "OBX-5",
+      "metric": "latencyP50",
+      "scalaValue": 134.912,
+      "rustValue": 15.542000000000002,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": "OBX-5",
+      "metric": "latencyP95",
+      "scalaValue": 163.328,
+      "rustValue": 18.292,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": "OBX-5",
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 240542.30482121056,
+      "rustValue": 59232.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": "OBX-5",
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 1709205037.9850743,
+      "rustValue": 3666896796.9626765,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": "OBX-5",
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 507.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "RXA-5.2",
+      "metric": "throughput",
+      "scalaValue": 0.1436998798740796,
+      "rustValue": 2.9428902713933405,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "RXA-5.2",
+      "metric": "latencyP50",
+      "scalaValue": 7.16,
+      "rustValue": 0.33299999999999996,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "RXA-5.2",
+      "metric": "latencyP95",
+      "scalaValue": 7.704,
+      "rustValue": 0.41600000000000004,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "RXA-5.2",
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 7081.3042862671455,
+      "rustValue": 1192.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "RXA-5.2",
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 995274538.1545995,
+      "rustValue": 3507925203.5008616,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "getValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "RXA-5.2",
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 9.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR -> OBX-5",
+      "metric": "throughput",
+      "scalaValue": 0.0004799402450606153,
+      "rustValue": 0.05100978459486142,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR -> OBX-5",
+      "metric": "latencyP50",
+      "scalaValue": 2117.632,
+      "rustValue": 18.875,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR -> OBX-5",
+      "metric": "latencyP95",
+      "scalaValue": 2281.472,
+      "rustValue": 22.708,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR -> OBX-5",
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 1293804.0017239111,
+      "rustValue": 66480.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR -> OBX-5",
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 610098982.7168984,
+      "rustValue": 3391130479.8663874,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR -> OBX-5",
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 611.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX-5",
+      "metric": "throughput",
+      "scalaValue": 0.0005255469504791208,
+      "rustValue": 0.7216319273056861,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX-5",
+      "metric": "latencyP50",
+      "scalaValue": 1888.256,
+      "rustValue": 1.375,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX-5",
+      "metric": "latencyP95",
+      "scalaValue": 1998.848,
+      "rustValue": 1.458,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX-5",
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 853284.0134575011,
+      "rustValue": 4080.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX-5",
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 452623514.6535924,
+      "rustValue": 2944258263.4071994,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX-5",
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 37.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[3]-5",
+      "metric": "throughput",
+      "scalaValue": 0.0005204986343690233,
+      "rustValue": 1.365169076190086,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[3]-5",
+      "metric": "latencyP50",
+      "scalaValue": 1929.2160000000001,
+      "rustValue": 0.625,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[3]-5",
+      "metric": "latencyP95",
+      "scalaValue": 2025.472,
+      "rustValue": 0.75,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[3]-5",
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 840843.8057949382,
+      "rustValue": 1872.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[3]-5",
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 437929058.2851873,
+      "rustValue": 2555596510.6278415,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[3]-5",
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 18.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[@5='VAL-1-2']-5",
+      "metric": "throughput",
+      "scalaValue": 0.0005123047731275216,
+      "rustValue": 0.739102670230127,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[@5='VAL-1-2']-5",
+      "metric": "latencyP50",
+      "scalaValue": 1902.592,
+      "rustValue": 1.333,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[@5='VAL-1-2']-5",
+      "metric": "latencyP95",
+      "scalaValue": 2045.952,
+      "rustValue": 1.375,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[@5='VAL-1-2']-5",
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 855287.6210364545,
+      "rustValue": 4160.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[@5='VAL-1-2']-5",
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 449055860.1608236,
+      "rustValue": 3074667108.157328,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[@5='VAL-1-2']-5",
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 33.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_001",
+      "pathExpression": null,
+      "metric": "throughput",
+      "scalaValue": 0.38398743723790046,
+      "rustValue": 0.7874102549161959,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_001",
+      "pathExpression": null,
+      "metric": "latencyP50",
+      "scalaValue": 3.08,
+      "rustValue": 1.208,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_001",
+      "pathExpression": null,
+      "metric": "latencyP95",
+      "scalaValue": 3.372,
+      "rustValue": 1.291,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_001",
+      "pathExpression": null,
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 3016.537021166833,
+      "rustValue": 1696.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_001",
+      "pathExpression": null,
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 1053384658.4617091,
+      "rustValue": 1335447792.3378682,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_001",
+      "pathExpression": null,
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 2.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": null,
+      "metric": "throughput",
+      "scalaValue": 0.5876306917373801,
+      "rustValue": 1.1487545203490377,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": null,
+      "metric": "latencyP50",
+      "scalaValue": 1.708,
+      "rustValue": 0.875,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": null,
+      "metric": "latencyP95",
+      "scalaValue": 2.372,
+      "rustValue": 1.042,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": null,
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 2720.371783687342,
+      "rustValue": 1112.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": null,
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 1485991610.5462697,
+      "rustValue": 1277415026.62813,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": null,
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 2.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a08_002",
+      "pathExpression": null,
+      "metric": "throughput",
+      "scalaValue": 0.3427727625568082,
+      "rustValue": 0.7885912920595165,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a08_002",
+      "pathExpression": null,
+      "metric": "latencyP50",
+      "scalaValue": 2.2920000000000003,
+      "rustValue": 1.167,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a08_002",
+      "pathExpression": null,
+      "metric": "latencyP95",
+      "scalaValue": 2.5,
+      "rustValue": 1.25,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a08_002",
+      "pathExpression": null,
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 3008.436410862394,
+      "rustValue": 1696.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a08_002",
+      "pathExpression": null,
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 1314500564.3066483,
+      "rustValue": 1337450831.3329399,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a08_002",
+      "pathExpression": null,
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 2.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "orm_o01_005",
+      "pathExpression": null,
+      "metric": "throughput",
+      "scalaValue": 0.28339252265203796,
+      "rustValue": 0.6863813699623039,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "orm_o01_005",
+      "pathExpression": null,
+      "metric": "latencyP50",
+      "scalaValue": 2.872,
+      "rustValue": 1.458,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "orm_o01_005",
+      "pathExpression": null,
+      "metric": "latencyP95",
+      "scalaValue": 3.124,
+      "rustValue": 1.5,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "orm_o01_005",
+      "pathExpression": null,
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 3208.523500937171,
+      "rustValue": 2048.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "orm_o01_005",
+      "pathExpression": null,
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 1105866902.915829,
+      "rustValue": 1405709045.6827984,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "orm_o01_005",
+      "pathExpression": null,
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 2.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_003",
+      "pathExpression": null,
+      "metric": "throughput",
+      "scalaValue": 0.24088144138338047,
+      "rustValue": 0.4709419403938205,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_003",
+      "pathExpression": null,
+      "metric": "latencyP50",
+      "scalaValue": 4.912,
+      "rustValue": 1.9580000000000002,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_003",
+      "pathExpression": null,
+      "metric": "latencyP95",
+      "scalaValue": 5.416,
+      "rustValue": 2.1670000000000003,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_003",
+      "pathExpression": null,
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 3624.768167708056,
+      "rustValue": 3032.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_003",
+      "pathExpression": null,
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 786239470.0048643,
+      "rustValue": 1427895963.2740636,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_003",
+      "pathExpression": null,
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 2.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": null,
+      "metric": "throughput",
+      "scalaValue": 0.017683823314406745,
+      "rustValue": 0.05556205631614455,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": null,
+      "metric": "latencyP50",
+      "scalaValue": 50.944,
+      "rustValue": 17.959,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": null,
+      "metric": "latencyP95",
+      "scalaValue": 61.824,
+      "rustValue": 18.125,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": null,
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 84798.3685934112,
+      "rustValue": 34848.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": null,
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 1595179431.3719199,
+      "rustValue": 1936226538.5050051,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": null,
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 2.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "vxu_v04_004",
+      "pathExpression": null,
+      "metric": "throughput",
+      "scalaValue": 0.25408817627309277,
+      "rustValue": 0.570747588020693,
+      "unit": "ops/us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "vxu_v04_004",
+      "pathExpression": null,
+      "metric": "latencyP50",
+      "scalaValue": 3.416,
+      "rustValue": 1.75,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "vxu_v04_004",
+      "pathExpression": null,
+      "metric": "latencyP95",
+      "scalaValue": 4.704,
+      "rustValue": 1.792,
+      "unit": "us",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "vxu_v04_004",
+      "pathExpression": null,
+      "metric": "allocationBytesPerOp",
+      "scalaValue": 3272.6972055359884,
+      "rustValue": 2432.0,
+      "unit": "bytes",
+      "verdict": "beats"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "vxu_v04_004",
+      "pathExpression": null,
+      "metric": "memoryAllocRateBytesPerSec",
+      "scalaValue": 889870617.5663848,
+      "rustValue": 1388058134.0663254,
+      "unit": "bytes/sec",
+      "verdict": "not-comparable"
+    },
+    {
+      "feature": "parsing",
+      "messageId": "vxu_v04_004",
+      "pathExpression": null,
+      "metric": "allocationCallCount",
+      "scalaValue": null,
+      "rustValue": 2.0,
+      "unit": "count",
+      "verdict": "not-comparable"
+    }
+  ],
+  "engineFailures": [
+    {
+      "engine": "scala",
+      "messageId": "adt_a01_001",
+      "feature": "getValue",
+      "reason": "path-form-mismatch",
+      "description": "no scala result for path 'PV1[1]-3.1' (present under a different pathExpression on that engine)"
+    },
+    {
+      "engine": "scala",
+      "messageId": "adt_a08_002",
+      "feature": "getValue",
+      "reason": "path-form-mismatch",
+      "description": "no scala result for path 'PV1[1]-3.1' (present under a different pathExpression on that engine)"
+    },
+    {
+      "engine": "scala",
+      "messageId": "orm_o01_005",
+      "feature": "getValue",
+      "reason": "path-form-mismatch",
+      "description": "no scala result for path 'OBR[1]-4.2' (present under a different pathExpression on that engine)"
+    },
+    {
+      "engine": "scala",
+      "messageId": "oru_r01_003",
+      "feature": "getValue",
+      "reason": "path-form-mismatch",
+      "description": "no scala result for path 'OBX[1]-5' (present under a different pathExpression on that engine)"
+    },
+    {
+      "engine": "scala",
+      "messageId": "oru_r01_003",
+      "feature": "getValue",
+      "reason": "path-form-mismatch",
+      "description": "no scala result for path \"OBX[@1='1']-5\" (present under a different pathExpression on that engine)"
+    },
+    {
+      "engine": "scala",
+      "messageId": "vxu_v04_004",
+      "feature": "getValue",
+      "reason": "path-form-mismatch",
+      "description": "no scala result for path 'RXA[1]-5.2' (present under a different pathExpression on that engine)"
+    }
+  ]
+}

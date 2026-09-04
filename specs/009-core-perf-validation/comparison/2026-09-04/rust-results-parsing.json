@@ -1,0 +1,214 @@
+{
+  "corpusId": "perf-v2",
+  "rustEngineVersion": "0.1.0",
+  "hostEnvironment": {
+    "os": "macos",
+    "arch": "aarch64"
+  },
+  "results": [
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_001",
+      "pathExpression": null,
+      "throughput": {
+        "value": 0.7874102549161959,
+        "unit": "ops/us"
+      },
+      "latencyP50": {
+        "value": 1.208,
+        "unit": "us"
+      },
+      "latencyP95": {
+        "value": 1.291,
+        "unit": "us"
+      },
+      "allocationBytesPerOp": {
+        "value": 1696.0,
+        "unit": "bytes"
+      },
+      "memoryAllocRateBytesPerSec": {
+        "value": 1335447792.3378682,
+        "unit": "bytes/sec"
+      },
+      "allocationCallCount": {
+        "value": 2.0,
+        "unit": "count"
+      }
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a08_002",
+      "pathExpression": null,
+      "throughput": {
+        "value": 0.7885912920595165,
+        "unit": "ops/us"
+      },
+      "latencyP50": {
+        "value": 1.167,
+        "unit": "us"
+      },
+      "latencyP95": {
+        "value": 1.25,
+        "unit": "us"
+      },
+      "allocationBytesPerOp": {
+        "value": 1696.0,
+        "unit": "bytes"
+      },
+      "memoryAllocRateBytesPerSec": {
+        "value": 1337450831.3329399,
+        "unit": "bytes/sec"
+      },
+      "allocationCallCount": {
+        "value": 2.0,
+        "unit": "count"
+      }
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_003",
+      "pathExpression": null,
+      "throughput": {
+        "value": 0.4709419403938205,
+        "unit": "ops/us"
+      },
+      "latencyP50": {
+        "value": 1.9580000000000002,
+        "unit": "us"
+      },
+      "latencyP95": {
+        "value": 2.1670000000000003,
+        "unit": "us"
+      },
+      "allocationBytesPerOp": {
+        "value": 3032.0,
+        "unit": "bytes"
+      },
+      "memoryAllocRateBytesPerSec": {
+        "value": 1427895963.2740636,
+        "unit": "bytes/sec"
+      },
+      "allocationCallCount": {
+        "value": 2.0,
+        "unit": "count"
+      }
+    },
+    {
+      "feature": "parsing",
+      "messageId": "vxu_v04_004",
+      "pathExpression": null,
+      "throughput": {
+        "value": 0.570747588020693,
+        "unit": "ops/us"
+      },
+      "latencyP50": {
+        "value": 1.75,
+        "unit": "us"
+      },
+      "latencyP95": {
+        "value": 1.792,
+        "unit": "us"
+      },
+      "allocationBytesPerOp": {
+        "value": 2432.0,
+        "unit": "bytes"
+      },
+      "memoryAllocRateBytesPerSec": {
+        "value": 1388058134.0663254,
+        "unit": "bytes/sec"
+      },
+      "allocationCallCount": {
+        "value": 2.0,
+        "unit": "count"
+      }
+    },
+    {
+      "feature": "parsing",
+      "messageId": "orm_o01_005",
+      "pathExpression": null,
+      "throughput": {
+        "value": 0.6863813699623039,
+        "unit": "ops/us"
+      },
+      "latencyP50": {
+        "value": 1.458,
+        "unit": "us"
+      },
+      "latencyP95": {
+        "value": 1.5,
+        "unit": "us"
+      },
+      "allocationBytesPerOp": {
+        "value": 2048.0,
+        "unit": "bytes"
+      },
+      "memoryAllocRateBytesPerSec": {
+        "value": 1405709045.6827984,
+        "unit": "bytes/sec"
+      },
+      "allocationCallCount": {
+        "value": 2.0,
+        "unit": "count"
+      }
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": null,
+      "throughput": {
+        "value": 0.05556205631614455,
+        "unit": "ops/us"
+      },
+      "latencyP50": {
+        "value": 17.959,
+        "unit": "us"
+      },
+      "latencyP95": {
+        "value": 18.125,
+        "unit": "us"
+      },
+      "allocationBytesPerOp": {
+        "value": 34848.0,
+        "unit": "bytes"
+      },
+      "memoryAllocRateBytesPerSec": {
+        "value": 1936226538.5050051,
+        "unit": "bytes/sec"
+      },
+      "allocationCallCount": {
+        "value": 2.0,
+        "unit": "count"
+      }
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": null,
+      "throughput": {
+        "value": 1.1487545203490377,
+        "unit": "ops/us"
+      },
+      "latencyP50": {
+        "value": 0.875,
+        "unit": "us"
+      },
+      "latencyP95": {
+        "value": 1.042,
+        "unit": "us"
+      },
+      "allocationBytesPerOp": {
+        "value": 1112.0,
+        "unit": "bytes"
+      },
+      "memoryAllocRateBytesPerSec": {
+        "value": 1277415026.62813,
+        "unit": "bytes/sec"
+      },
+      "allocationCallCount": {
+        "value": 2.0,
+        "unit": "count"
+      }
+    }
+  ],
+  "engineFailures": []
+}

@@ -43,6 +43,9 @@ public final class BenchmarkRunner {
     Options options = new OptionsBuilder()
         .include("gov\\.cdc\\.hl7\\.bench\\.ParsingBenchmarks\\..*")
         .include("gov\\.cdc\\.hl7\\.bench\\.ExtractionBenchmarks\\..*")
+        // Roadmap spec 009 (research.md #4): hierarchy-mode (`->`) coverage,
+        // which this harness had none of before.
+        .include("gov\\.cdc\\.hl7\\.bench\\.HierarchyBenchmarks\\..*")
         .addProfiler(GCProfiler.class)
         // forks(3), not forks(1): for these sub-microsecond calls, run-to-run
         // reproducibility (spec.md SC-003) is dominated by which JIT compilation tier

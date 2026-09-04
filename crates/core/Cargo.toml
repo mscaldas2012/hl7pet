@@ -8,3 +8,17 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
 [dev-dependencies]
+
+# spec 009-core-perf-validation: no criterion (research.md #2) — plain
+# harness = false binaries using benches/common/{timing,alloc,corpus}.rs.
+[[bench]]
+name = "parsing"
+harness = false
+
+[[bench]]
+name = "extraction"
+harness = false
+
+[[bench]]
+name = "hierarchy"
+harness = false

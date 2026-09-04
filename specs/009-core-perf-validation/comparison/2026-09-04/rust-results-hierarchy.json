@@ -1,0 +1,127 @@
+{
+  "corpusId": "perf-v2",
+  "rustEngineVersion": "0.1.0",
+  "hostEnvironment": {
+    "os": "macos",
+    "arch": "aarch64"
+  },
+  "results": [
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX-5",
+      "throughput": {
+        "value": 0.7216319273056861,
+        "unit": "ops/us"
+      },
+      "latencyP50": {
+        "value": 1.375,
+        "unit": "us"
+      },
+      "latencyP95": {
+        "value": 1.458,
+        "unit": "us"
+      },
+      "allocationBytesPerOp": {
+        "value": 4080.0,
+        "unit": "bytes"
+      },
+      "memoryAllocRateBytesPerSec": {
+        "value": 2944258263.4071994,
+        "unit": "bytes/sec"
+      },
+      "allocationCallCount": {
+        "value": 37.0,
+        "unit": "count"
+      }
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[3]-5",
+      "throughput": {
+        "value": 1.365169076190086,
+        "unit": "ops/us"
+      },
+      "latencyP50": {
+        "value": 0.625,
+        "unit": "us"
+      },
+      "latencyP95": {
+        "value": 0.75,
+        "unit": "us"
+      },
+      "allocationBytesPerOp": {
+        "value": 1872.0,
+        "unit": "bytes"
+      },
+      "memoryAllocRateBytesPerSec": {
+        "value": 2555596510.6278415,
+        "unit": "bytes/sec"
+      },
+      "allocationCallCount": {
+        "value": 18.0,
+        "unit": "count"
+      }
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[@5='VAL-1-2']-5",
+      "throughput": {
+        "value": 0.739102670230127,
+        "unit": "ops/us"
+      },
+      "latencyP50": {
+        "value": 1.333,
+        "unit": "us"
+      },
+      "latencyP95": {
+        "value": 1.375,
+        "unit": "us"
+      },
+      "allocationBytesPerOp": {
+        "value": 4160.0,
+        "unit": "bytes"
+      },
+      "memoryAllocRateBytesPerSec": {
+        "value": 3074667108.157328,
+        "unit": "bytes/sec"
+      },
+      "allocationCallCount": {
+        "value": 33.0,
+        "unit": "count"
+      }
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR -> OBX-5",
+      "throughput": {
+        "value": 0.05100978459486142,
+        "unit": "ops/us"
+      },
+      "latencyP50": {
+        "value": 18.875,
+        "unit": "us"
+      },
+      "latencyP95": {
+        "value": 22.708,
+        "unit": "us"
+      },
+      "allocationBytesPerOp": {
+        "value": 66480.0,
+        "unit": "bytes"
+      },
+      "memoryAllocRateBytesPerSec": {
+        "value": 3391130479.8663874,
+        "unit": "bytes/sec"
+      },
+      "allocationCallCount": {
+        "value": 611.0,
+        "unit": "count"
+      }
+    }
+  ],
+  "engineFailures": []
+}

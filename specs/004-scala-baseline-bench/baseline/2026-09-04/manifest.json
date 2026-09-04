@@ -1,0 +1,13 @@
+{
+  "runDate" : "2026-09-04",
+  "engineCoordinate" : "gov.cdc:hl7-pet_2.13:1.2.11",
+  "corpusId" : "perf-v2",
+  "hostEnvironment" : {
+    "cpu" : "Apple M5",
+    "os" : "Mac OS X 26.6.2",
+    "jdkVendorVersion" : "Homebrew 26.0.1",
+    "jmhVersion" : "1.37"
+  },
+  "excludedMessages" : [ ],
+  "resultsFile" : "jmh-results.json"
+}
