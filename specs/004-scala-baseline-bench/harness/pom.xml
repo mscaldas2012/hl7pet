@@ -89,6 +89,28 @@
 
   <build>
     <finalName>scala-baseline-harness</finalName>
+    <resources>
+      <resource>
+        <directory>${project.basedir}/src/main/resources</directory>
+      </resource>
+      <!-- The benchmark corpus lives in the shared fixtures/ tree (Roadmap spec
+           003), not bundled under this module - Roadmap spec 009 completes the
+           migration this spec's own status once deferred. targetPath keeps it on
+           the classpath at the same "/corpus/..." location Corpus.java already
+           reads, so that class needs no path-prefix change. -->
+      <resource>
+        <directory>${project.basedir}/../../../fixtures/messages/perf</directory>
+        <targetPath>corpus</targetPath>
+      </resource>
+      <!-- HierarchyBenchmarks loads large-hierarchy.json's segmentDefinition
+           profile directly (Corpus/ManifestEntry has no profileRef field -
+           this is the one hierarchy-eligible message, not worth generalizing
+           the manifest shape for). -->
+      <resource>
+        <directory>${project.basedir}/../../../fixtures/profiles</directory>
+        <targetPath>profiles</targetPath>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

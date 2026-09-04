@@ -30,7 +30,10 @@ class HarnessWiringTest {
 
   @Test
   void corpusLoadsWithExpectedShape() {
-    assertEquals("interim-v1", Corpus.corpusId());
+    // "perf-v2": Roadmap spec 009 relocated this corpus to fixtures/messages/perf/
+    // (the shared cross-language corpus root) and added one new message, completing
+    // the migration this spec's own status had deferred.
+    assertEquals("perf-v2", Corpus.corpusId());
     List<Corpus.CorpusMessage> all = Corpus.all();
     assertTrue(all.size() >= 20 && all.size() <= 30, "expected ~20-30 corpus messages, got " + all.size());
 
@@ -63,7 +66,7 @@ class HarnessWiringTest {
     JsonNode root = new ObjectMapper().readTree(manifestPath.toFile());
     assertEquals("test-run", root.get("runDate").asText());
     assertFalse(root.get("engineCoordinate").asText().isBlank());
-    assertEquals("interim-v1", root.get("corpusId").asText());
+    assertEquals("perf-v2", root.get("corpusId").asText());
     assertEquals("jmh-results.json", root.get("resultsFile").asText());
 
     JsonNode env = root.get("hostEnvironment");

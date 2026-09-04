@@ -1,5 +1,5 @@
 {
-  "corpusId": "interim-v1",
+  "corpusId": "perf-v2",
   "messages": [
     {
       "messageId": "adt_a01_001",
@@ -162,6 +162,13 @@
       "messageType": "ADT^A01",
       "sizeCategory": "minimal",
       "filePath": "adt_a01_minimal_027.hl7"
+    },
+    {
+      "messageId": "large_hierarchy_028",
+      "messageType": "ORU^R01^HIERARCHY",
+      "sizeCategory": "large-hierarchy",
+      "filePath": "large-hierarchy.hl7",
+      "profileRef": "../../profiles/large-hierarchy.json"
     }
   ]
 }
