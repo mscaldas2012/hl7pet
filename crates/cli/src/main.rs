@@ -3,7 +3,7 @@
 //! line. Not a formal roadmap feature — a dev tool, not tracked as its own
 //! spec.
 //!
-//! Usage: hl7pet <message-file> <path-expr> [--first] [--profile <file>]
+//! Usage: hl7pet <message-file> <path-expr> [--first] [--profile <file>] [--located]
 //!
 //! Exit codes: 0 = match(es) found, 1 = no match, 2 = usage/read/scan/parse/
 //! profile/query error (grep-like convention).
@@ -16,11 +16,13 @@ fn main() -> ExitCode {
 
     let mut positional: Vec<&String> = Vec::new();
     let mut first_only = false;
+    let mut located = false;
     let mut profile_path: Option<&String> = None;
     let mut arg_iter = args[1..].iter();
     while let Some(arg) = arg_iter.next() {
         match arg.as_str() {
             "--first" => first_only = true,
+            "--located" => located = true,
             "--profile" => {
                 profile_path = arg_iter.next();
                 if profile_path.is_none() {
@@ -33,13 +35,14 @@ fn main() -> ExitCode {
     }
 
     let [file_path, path_expr] = positional[..] else {
-        eprintln!("usage: {program} <message-file> <path-expr> [--first] [--profile <file>]");
+        eprintln!("usage: {program} <message-file> <path-expr> [--first] [--profile <file>] [--located]");
         eprintln!();
         eprintln!("  <message-file>  path to a raw HL7 v2 message file");
         eprintln!("  <path-expr>     a PATH expression, e.g. \"PID-5.1\", \"OBX[2]-5\", or");
         eprintln!("                  \"OBR[1] -> OBX-5\" (hierarchy, requires --profile)");
         eprintln!("  --first         print only the first matched value (getFirstValue-style)");
         eprintln!("  --profile <file>  a segmentDefinition JSON profile, for hierarchy PATHs");
+        eprintln!("  --located       print each value with its 1-based source line (non-hierarchy PATHs only, spec 1000)");
         return ExitCode::from(2);
     };
 
@@ -66,6 +69,40 @@ fn main() -> ExitCode {
             return ExitCode::from(2);
         }
     };
+
+    if located {
+        if compiled.child.is_some() {
+            eprintln!("error: --located does not support hierarchy PATHs (\"->\"), spec 1000 FR-009 scope");
+            return ExitCode::from(2);
+        }
+        let values = if first_only {
+            match hl7pet_core::first_located(&scan_result, &compiled) {
+                Ok(v) => v.into_iter().collect::<Vec<_>>(),
+                Err(e) => {
+                    eprintln!("query error: {e}");
+                    return ExitCode::from(2);
+                }
+            }
+        } else {
+            match hl7pet_core::execute_located(&scan_result, &compiled) {
+                Ok(v) => v.into_iter().flatten().collect::<Vec<_>>(),
+                Err(e) => {
+                    eprintln!("query error: {e}");
+                    return ExitCode::from(2);
+                }
+            }
+        };
+
+        return if values.is_empty() {
+            println!("(no match)");
+            ExitCode::from(1)
+        } else {
+            for lv in &values {
+                println!("line {}: {}", lv.line, lv.value);
+            }
+            ExitCode::SUCCESS
+        };
+    }
 
     let profile = match profile_path {
         Some(path) => {

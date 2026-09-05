@@ -15,6 +15,11 @@
 //! `Ok(vec![])`. The one genuine error is a non-numeric operand compared with
 //! an ordering filter operator (FR-008) — the one case the real engine does
 //! *not* handle gracefully (an uncaught `NumberFormatException`).
+//!
+//! Also home to `execute_located`/`LocatedValue` (spec
+//! 1000-located-extraction-api), the location-aware counterpart to `execute`
+//! that pairs each value with its source segment's 1-based line number —
+//! additive, non-hierarchy-only, and never changing `execute`'s own output.
 
 use crate::parser::{CompiledPath, FieldExpr, FieldIndex, FilterClause, FilterOperator, SegIndex};
 use crate::scanner::{DelimiterSet, ScanResult, SegmentSpan};
@@ -40,6 +45,18 @@ impl std::fmt::Display for QueryError {
 }
 
 impl std::error::Error for QueryError {}
+
+/// A value `execute()` would already return, paired with the 1-based line
+/// number (its position among all segments in the source message) of the
+/// segment occurrence it came from (spec 1000-located-extraction-api). Every
+/// `LocatedValue` produced from the same segment occurrence shares one
+/// `line` — location is tracked per occurrence, not per sub-segment
+/// position (FR-005) — and `line` is always `>= 1`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct LocatedValue<'m> {
+    pub value: &'m str,
+    pub line: usize,
+}
 
 /// Executes `path` (non-hierarchy form — `path.child` is ignored, spec 008's
 /// responsibility) against `scan`, returning the outer/inner value shape
@@ -78,6 +95,52 @@ pub fn execute<'m>(
     Ok(result)
 }
 
+/// Location-aware counterpart to `execute` (spec 1000-located-extraction-api).
+/// Same preconditions and non-hierarchy scope as `execute` (`path.child` is
+/// ignored); for the same `scan`/`path`, stripping every `LocatedValue.line`
+/// from this function's output reproduces `execute`'s output exactly
+/// (contracts/located-extraction-api.md). The line number comes from each
+/// matched segment occurrence's own position in `scan.segments`
+/// (`resolve_segment_candidates_indexed`, research.md #1) — no second pass
+/// over the message or the segment list beyond what `execute` already does,
+/// and allocation count does not scale with unrelated message size (SC-004),
+/// though it is a small constant higher than `execute`'s per matched
+/// occurrence (research.md #5).
+pub fn execute_located<'m>(
+    scan: &ScanResult<'m>,
+    path: &CompiledPath<'_>,
+) -> Result<Vec<Vec<LocatedValue<'m>>>, QueryError> {
+    let candidates =
+        resolve_segment_candidates_indexed(scan, path.segment.name, path.segment.index.as_ref())?;
+
+    let mut result = Vec::with_capacity(candidates.len());
+    for (line, span) in &candidates {
+        let segment_content = &scan.message[span.start..span.end];
+        let segment_name = scan.segment_name(span);
+        let values =
+            resolve_field_values_located(*line, path.field.as_ref(), segment_content, segment_name, &scan.delimiters);
+        // Same collapse-to-no-entry rule as execute() for an out-of-range
+        // field-repetition index (research.md #2) — never an empty group.
+        if !values.is_empty() {
+            result.push(values);
+        }
+    }
+    Ok(result)
+}
+
+/// Location-aware counterpart to the CLI's existing `--first` convenience
+/// (research.md #2 — there is no dedicated `execute_first` in the core
+/// today). Returns the first located value `execute_located` would produce,
+/// or `None` when nothing matches. Not an independent traversal: this is
+/// exactly `execute_located`'s output, truncated, so it costs no more than
+/// that single call.
+pub fn first_located<'m>(
+    scan: &ScanResult<'m>,
+    path: &CompiledPath<'_>,
+) -> Result<Option<LocatedValue<'m>>, QueryError> {
+    Ok(execute_located(scan, path)?.into_iter().flatten().next())
+}
+
 /// Resolves a segment index selector (`SegIndex`) against the ordered set of
 /// segment occurrences in `scan` whose name matches `segment_name`. An
 /// explicit `Numeric`/`Last` index beyond what's present yields zero
@@ -88,11 +151,30 @@ pub(crate) fn resolve_segment_candidates<'m>(
     segment_name: &str,
     index: Option<&SegIndex<'_>>,
 ) -> Result<Vec<SegmentSpan>, QueryError> {
-    let matching: Vec<SegmentSpan> = scan
+    Ok(resolve_segment_candidates_indexed(scan, segment_name, index)?
+        .into_iter()
+        .map(|(_, span)| span)
+        .collect())
+}
+
+/// Same resolution as `resolve_segment_candidates`, additionally pairing each
+/// candidate with its 1-based line number (its position among all segments
+/// in `scan.segments`) — captured within this same single filtering pass,
+/// not a second one (spec 1000-located-extraction-api, research.md #1).
+/// `resolve_segment_candidates` delegates to this function so its own
+/// existing callers (`execute`, `hierarchy::execute_hierarchy`) see no
+/// behavior change at all.
+pub(crate) fn resolve_segment_candidates_indexed<'m>(
+    scan: &ScanResult<'m>,
+    segment_name: &str,
+    index: Option<&SegIndex<'_>>,
+) -> Result<Vec<(usize, SegmentSpan)>, QueryError> {
+    let matching: Vec<(usize, SegmentSpan)> = scan
         .segments
         .iter()
-        .filter(|span| scan.segment_name(span) == segment_name)
-        .copied()
+        .enumerate()
+        .filter(|(_, span)| scan.segment_name(span) == segment_name)
+        .map(|(i, span)| (i + 1, *span))
         .collect();
 
     match index {
@@ -108,9 +190,9 @@ pub(crate) fn resolve_segment_candidates<'m>(
         Some(SegIndex::Last) => Ok(matching.last().copied().into_iter().collect()),
         Some(SegIndex::Filter(clause)) => {
             let mut selected = Vec::new();
-            for span in matching {
+            for (line, span) in matching {
                 if filter_matches(scan, &span, clause)? {
-                    selected.push(span);
+                    selected.push((line, span));
                 }
             }
             Ok(selected)
@@ -193,6 +275,39 @@ pub(crate) fn resolve_field_values<'m>(
             select_by_field_index(&repetitions, fe.index)
                 .into_iter()
                 .map(|rep| extract_component(rep, delimiters, fe.component, fe.subcomponent))
+                .collect()
+        }
+    }
+}
+
+/// Same resolution as `resolve_field_values`, producing `LocatedValue`s
+/// directly instead of `&'m str`s (spec 1000-located-extraction-api), so
+/// `execute_located` has one call site rather than a `resolve_field_values`
+/// call immediately followed by a second `.map(...).collect()` retagging
+/// every element with `line`. Total allocation count is the same either way
+/// (research.md #5) — an `&str -> &str` map/collect reuses its input Vec's
+/// buffer in place (same element size), but an `&str -> LocatedValue` one
+/// cannot (different element size) regardless of which function performs
+/// it — so this exists for a single, direct call site, not for a saved
+/// allocation.
+pub(crate) fn resolve_field_values_located<'m>(
+    line: usize,
+    field_expr: Option<&FieldExpr>,
+    segment_content: &'m str,
+    segment_name: &str,
+    delimiters: &DelimiterSet,
+) -> Vec<LocatedValue<'m>> {
+    match field_expr {
+        None => vec![LocatedValue { value: segment_content, line }],
+        Some(fe) => {
+            let raw_field = field_at(segment_name, segment_content, delimiters.field, fe.field_num);
+            let repetitions = split_bytes(raw_field, delimiters.repetition);
+            select_by_field_index(&repetitions, fe.index)
+                .into_iter()
+                .map(|rep| LocatedValue {
+                    value: extract_component(rep, delimiters, fe.component, fe.subcomponent),
+                    line,
+                })
                 .collect()
         }
     }
@@ -635,5 +750,166 @@ mod tests {
          OBX|2|ST|X||Second||||||F\n\
          OBX|3|ST|X||Third||||||F\n"
             .to_string()
+    }
+
+    // --- US1 (spec 1000, T007/T008): execute_located single-occurrence cases ---
+
+    #[test]
+    fn execute_located_single_occurrence_matches_execute_value_and_reports_line_one() {
+        let message = multi_obx_message();
+        let scan_result = scan(&message).unwrap();
+        let path = parse("MSH-12").unwrap();
+
+        let plain = execute(&scan_result, &path).unwrap();
+        let located = execute_located(&scan_result, &path).unwrap();
+
+        assert_eq!(located.len(), plain.len());
+        assert_eq!(located[0].len(), plain[0].len());
+        assert_eq!(located[0][0].value, plain[0][0]);
+        // MSH is always the first segment in the message.
+        assert_eq!(located[0][0].line, 1);
+    }
+
+    #[test]
+    fn execute_located_values_from_same_occurrence_share_one_line() {
+        // OBR-4 has multiple components; splitting into component values
+        // must not change which segment occurrence (and therefore line)
+        // each value is attributed to (spec.md FR-005).
+        let message = "MSH|^~\\&|A|B|A|B|20260101000000||ORU^R01|1|P|2.5.1\n\
+                        PID|1\n\
+                        OBR|1|X|Y|94500-6^Name^LN\n"
+            .to_string();
+        let scan_result = scan(&message).unwrap();
+        let path = parse("OBR-4").unwrap();
+
+        let located = execute_located(&scan_result, &path).unwrap();
+        assert_eq!(located.len(), 1, "expected exactly one OBR occurrence");
+        assert_eq!(
+            located[0],
+            vec![LocatedValue { value: "94500-6^Name^LN", line: 3 }],
+            "OBR is the 3rd segment (MSH, PID, OBR)"
+        );
+    }
+
+    #[test]
+    fn execute_located_matches_execute_for_every_value_when_multiple_repetitions_present() {
+        let message = "MSH|^~\\&|A|B|A|B|20260101000000||ORU^R01|1|P|2.5.1\n\
+                        OBX|1|ST|X||IgG~IgM||||||F\n"
+            .to_string();
+        let scan_result = scan(&message).unwrap();
+        let path = parse("OBX-5[*]").unwrap();
+
+        let plain = execute(&scan_result, &path).unwrap();
+        let located = execute_located(&scan_result, &path).unwrap();
+
+        let stripped: Vec<Vec<&str>> = located
+            .iter()
+            .map(|group| group.iter().map(|lv| lv.value).collect())
+            .collect();
+        assert_eq!(stripped, plain, "execute_located must agree with execute on values");
+        // Both repetitions come from the same (only) OBX occurrence, line 2.
+        for group in &located {
+            for lv in group {
+                assert_eq!(lv.line, 2);
+            }
+        }
+    }
+
+    // --- US2 (spec 1000, T010/T011): execute_located multi-occurrence cases ---
+
+    #[test]
+    fn execute_located_assigns_each_occurrence_its_own_ascending_line() {
+        let message = multi_obx_message();
+        let scan_result = scan(&message).unwrap();
+        let path = parse("OBX-5").unwrap();
+
+        let located = execute_located(&scan_result, &path).unwrap();
+        assert_eq!(located.len(), 3, "expected three OBX occurrences");
+        let lines: Vec<usize> = located.iter().map(|group| group[0].line).collect();
+        // MSH is line 1, so the three OBX occurrences are lines 2, 3, 4.
+        assert_eq!(lines, vec![2, 3, 4], "each occurrence must carry its own, ascending, document-order line");
+        let values: Vec<&str> = located.iter().map(|group| group[0].value).collect();
+        assert_eq!(values, vec!["First", "Second", "Third"]);
+    }
+
+    #[test]
+    fn execute_located_filter_excludes_occurrences_but_keeps_correct_lines_for_survivors() {
+        let message = filter_example_message();
+        let scan_result = scan(&message).unwrap();
+        // Matches only the second OBX occurrence (OBX-3.1 == "85477-8").
+        let path = parse("OBX[@3.1='85477-8']-5").unwrap();
+
+        let located = execute_located(&scan_result, &path).unwrap();
+        assert_eq!(located.len(), 1, "the filter must exclude the non-matching occurrence entirely");
+        assert_eq!(located[0], vec![LocatedValue { value: "Negative", line: 3 }]);
+    }
+
+    // --- US3 (spec 1000, T013/T014): first_located ---
+
+    #[test]
+    fn first_located_returns_only_the_first_group_first_value() {
+        let message = multi_obx_message();
+        let scan_result = scan(&message).unwrap();
+        let path = parse("OBX-5").unwrap();
+
+        let all = execute_located(&scan_result, &path).unwrap();
+        let first = first_located(&scan_result, &path).unwrap();
+
+        assert_eq!(first, Some(all[0][0]));
+    }
+
+    #[test]
+    fn first_located_returns_none_when_nothing_matches() {
+        let message = multi_obx_message();
+        let scan_result = scan(&message).unwrap();
+
+        // Absent segment type.
+        let absent = parse("ZZZ-1").unwrap();
+        assert_eq!(first_located(&scan_result, &absent).unwrap(), None);
+
+        // Out-of-range segment index.
+        let out_of_range = parse("OBX[5]-5").unwrap();
+        assert_eq!(first_located(&scan_result, &out_of_range).unwrap(), None);
+
+        // Filter matches nothing.
+        let no_filter_match = parse("OBX[@5='99999']-5").unwrap();
+        assert_eq!(first_located(&scan_result, &no_filter_match).unwrap(), None);
+    }
+
+    // --- Polish (T017): execute_located allocates no more than execute() ---
+
+    // research.md #5: `execute_located` costs one small, constant (not
+    // message-size-dependent) allocation more than `execute()` per matched
+    // occurrence — traced to `std::vec::Vec`'s same-size-element in-place
+    // map/collect optimization, which applies to `execute()`'s `&str -> &str`
+    // final mapping step but not to `execute_located`'s `&str -> LocatedValue`
+    // one (different element size). This is a fixed per-occurrence constant,
+    // not a second pass over the message, so the property SC-004 actually
+    // requires — allocation count independent of unrelated message size —
+    // still holds and is what this test verifies, mirroring `execute()`'s own
+    // `execute_single_pass_allocation_count_independent_of_segment_count`.
+    #[test]
+    fn execute_located_allocation_count_independent_of_segment_count() {
+        let path = parse("OBX-5").expect("OBX-5 must parse");
+
+        let small_message = padded_message(0);
+        let large_message = padded_message(500);
+
+        let small_allocs = count_allocs(|| {
+            let scan_result = scan(&small_message).unwrap();
+            let result = execute_located(&scan_result, &path).unwrap();
+            std::hint::black_box(&result);
+        });
+        let large_allocs = count_allocs(|| {
+            let scan_result = scan(&large_message).unwrap();
+            let result = execute_located(&scan_result, &path).unwrap();
+            std::hint::black_box(&result);
+        });
+
+        assert_eq!(
+            small_allocs, large_allocs,
+            "allocation count must not scale with unrelated segment count — \
+             execute_located() must not re-scan the full message per query (SC-004)"
+        );
     }
 }
