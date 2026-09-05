@@ -8,7 +8,7 @@ pub use parser::{
     parse, ChildPath, CompiledPath, FieldExpr, FieldIndex, FilterClause, FilterOperator,
     ParseError, ParseErrorKind, SegIndex, SegmentExpr,
 };
-pub use query::{execute, QueryError};
+pub use query::{execute, execute_located, first_located, LocatedValue, QueryError};
 pub use scanner::{
     scan, DelimiterKind, DelimiterOccurrence, DelimiterSet, ScanError, ScanResult, SegmentSpan,
 };
