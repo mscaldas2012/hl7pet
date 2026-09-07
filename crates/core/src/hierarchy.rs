@@ -12,6 +12,7 @@
 //! child-index bug (spec 002 Section A.4) — this module fixes it instead,
 //! as a documented Breaking Change (`ROADMAP.md`).
 
+use std::borrow::Cow;
 use std::collections::HashMap;
 
 use serde::Deserialize;
@@ -271,7 +272,7 @@ pub fn execute_hierarchy<'m>(
     scan: &ScanResult<'m>,
     path: &CompiledPath<'_>,
     profile: Option<&HierarchyProfile>,
-) -> Result<Vec<Vec<&'m str>>, QueryError> {
+) -> Result<Vec<Vec<Cow<'m, str>>>, QueryError> {
     let Some(child) = path.child.as_ref() else {
         return query::execute(scan, path);
     };

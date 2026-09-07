@@ -20,6 +20,18 @@
 //! 1000-located-extraction-api), the location-aware counterpart to `execute`
 //! that pairs each value with its source segment's 1-based line number —
 //! additive, non-hierarchy-only, and never changing `execute`'s own output.
+//!
+//! Every value this module returns is now decoded for standard HL7 escape
+//! sequences, unconditionally (spec 1001-escape-sequence-decoding) — hence
+//! `Cow<'m, str>` rather than a plain `&'m str`: decoded text is not always a
+//! slice of the original message (highlighting markers are removed, hex
+//! sequences decode to different bytes), but a value containing no escape
+//! sequence at all still costs nothing beyond a presence check
+//! (`decode_escapes`, `Cow::Borrowed` fast path). Filter-clause (`@field=value`)
+//! comparisons are untouched — they still compare raw, undecoded content
+//! (research.md #3).
+
+use std::borrow::Cow;
 
 use crate::parser::{CompiledPath, FieldExpr, FieldIndex, FilterClause, FilterOperator, SegIndex};
 use crate::scanner::{DelimiterSet, ScanResult, SegmentSpan};
@@ -46,15 +58,144 @@ impl std::fmt::Display for QueryError {
 
 impl std::error::Error for QueryError {}
 
+/// Decodes standard HL7 v2 escape sequences in `raw`, using `delimiters`'
+/// own escape/field/component/subcomponent/repetition characters — never a
+/// hardcoded `\` (spec 1001-escape-sequence-decoding FR-002). Returns
+/// `Cow::Borrowed(raw)` unchanged, at zero allocation cost, when `raw`
+/// contains no occurrence of the message's own escape byte at all — the
+/// fast path required so a value with no escape sequence costs nothing
+/// beyond this one presence check (research.md #1). A malformed or
+/// unrecognized escape sequence (unterminated, unknown type-char, an odd
+/// number of hex digits, or hex bytes that don't form valid UTF-8) is left
+/// completely unmodified in the output — this function never fails and
+/// never panics (FR-006).
+///
+/// | Sequence | Decodes to |
+/// |---|---|
+/// | `\F\` `\S\` `\T\` `\R\` `\E\` | that message's own field/component/subcomponent/repetition/escape character |
+/// | `\H\` `\N\` | *(removed — no substitution)* |
+/// | `\Xdddd..\` | the byte sequence the hex digit pairs represent, UTF-8-validated as a whole |
+/// | `\Zxxx\` | `xxx` unchanged (delimiters stripped) |
+/// | anything else | left completely unmodified, including the escape byte itself |
+pub(crate) fn decode_escapes<'m>(raw: &'m str, delimiters: &DelimiterSet) -> Cow<'m, str> {
+    let esc = delimiters.escape;
+    if !raw.bytes().any(|b| b == esc) {
+        return Cow::Borrowed(raw);
+    }
+
+    let bytes = raw.as_bytes();
+    let mut out: Vec<u8> = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] != esc {
+            out.push(bytes[i]);
+            i += 1;
+            continue;
+        }
+
+        // bytes[i] == esc. A trailing, unterminated escape byte is malformed.
+        if i + 1 >= bytes.len() {
+            out.push(bytes[i]);
+            i += 1;
+            continue;
+        }
+        let type_char = bytes[i + 1];
+
+        match type_char {
+            b'F' | b'S' | b'T' | b'R' | b'E' if i + 2 < bytes.len() && bytes[i + 2] == esc => {
+                out.push(match type_char {
+                    b'F' => delimiters.field,
+                    b'S' => delimiters.component,
+                    b'T' => delimiters.subcomponent,
+                    b'R' => delimiters.repetition,
+                    b'E' => delimiters.escape,
+                    _ => unreachable!(),
+                });
+                i += 3;
+            }
+            b'H' | b'N' if i + 2 < bytes.len() && bytes[i + 2] == esc => {
+                i += 3;
+            }
+            b'X' => match find_closing(bytes, i + 2, esc).and_then(|end| {
+                decode_hex_pairs(&bytes[i + 2..end]).map(|decoded| (end, decoded))
+            }) {
+                Some((end, decoded_bytes)) => match std::str::from_utf8(&decoded_bytes) {
+                    Ok(s) => {
+                        out.extend_from_slice(s.as_bytes());
+                        i = end + 1;
+                    }
+                    Err(_) => {
+                        out.push(bytes[i]);
+                        i += 1;
+                    }
+                },
+                None => {
+                    out.push(bytes[i]);
+                    i += 1;
+                }
+            },
+            b'Z' => match find_closing(bytes, i + 2, esc) {
+                Some(end) => {
+                    out.extend_from_slice(&bytes[i + 2..end]);
+                    i = end + 1;
+                }
+                None => {
+                    out.push(bytes[i]);
+                    i += 1;
+                }
+            },
+            _ => {
+                out.push(bytes[i]);
+                i += 1;
+            }
+        }
+    }
+
+    // `out` is built exclusively from `raw`'s own UTF-8 bytes, single-byte
+    // ASCII delimiter characters, and hex-decoded runs already validated as
+    // UTF-8 above — always valid UTF-8. The fallback is unreachable in
+    // practice but avoids ever panicking on a from_utf8 assumption.
+    match String::from_utf8(out) {
+        Ok(s) => Cow::Owned(s),
+        Err(_) => Cow::Borrowed(raw),
+    }
+}
+
+/// Finds the offset of the next occurrence of `esc` at or after `from`,
+/// used to locate a `\X..\`/`\Z..\` sequence's closing delimiter.
+fn find_closing(bytes: &[u8], from: usize, esc: u8) -> Option<usize> {
+    bytes[from..].iter().position(|&b| b == esc).map(|rel| from + rel)
+}
+
+/// Decodes a run of ASCII hex-digit pairs into their represented bytes.
+/// `None` for an empty, odd-length, or non-hex-digit input (FR-006's
+/// malformed case).
+fn decode_hex_pairs(hex: &[u8]) -> Option<Vec<u8>> {
+    if hex.is_empty() || !hex.len().is_multiple_of(2) {
+        return None;
+    }
+    hex.chunks(2)
+        .map(|pair| {
+            let hi = (pair[0] as char).to_digit(16)?;
+            let lo = (pair[1] as char).to_digit(16)?;
+            Some(((hi << 4) | lo) as u8)
+        })
+        .collect()
+}
+
 /// A value `execute()` would already return, paired with the 1-based line
 /// number (its position among all segments in the source message) of the
 /// segment occurrence it came from (spec 1000-located-extraction-api). Every
 /// `LocatedValue` produced from the same segment occurrence shares one
 /// `line` — location is tracked per occurrence, not per sub-segment
-/// position (FR-005) — and `line` is always `>= 1`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// position (FR-005) — and `line` is always `>= 1`. `value` is `Cow<str>`
+/// rather than `&str` since it is now always decoded (spec
+/// 1001-escape-sequence-decoding) — `Cow::Borrowed` when the underlying
+/// content has no escape sequence, `Cow::Owned` when decoding rewrote it.
+/// Not `Copy` — `Cow<str>` may own a `String`.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LocatedValue<'m> {
-    pub value: &'m str,
+    pub value: Cow<'m, str>,
     pub line: usize,
 }
 
@@ -69,11 +210,13 @@ pub struct LocatedValue<'m> {
 /// engine: `OBX-5[5]` beyond the repetitions present collapses to no match
 /// entirely, not an empty inner list) — distinct from FR-009(e)'s "component/
 /// subcomponent beyond what's present," which still yields a single
-/// empty-string entry.
+/// empty-string entry. Every returned value is decoded for standard HL7
+/// escape sequences, unconditionally (spec 1001-escape-sequence-decoding) —
+/// see `decode_escapes`.
 pub fn execute<'m>(
     scan: &ScanResult<'m>,
     path: &CompiledPath<'_>,
-) -> Result<Vec<Vec<&'m str>>, QueryError> {
+) -> Result<Vec<Vec<Cow<'m, str>>>, QueryError> {
     let candidates = resolve_segment_candidates(scan, path.segment.name, path.segment.index.as_ref())?;
 
     let mut result = Vec::with_capacity(candidates.len());
@@ -105,7 +248,8 @@ pub fn execute<'m>(
 /// over the message or the segment list beyond what `execute` already does,
 /// and allocation count does not scale with unrelated message size (SC-004),
 /// though it is a small constant higher than `execute`'s per matched
-/// occurrence (research.md #5).
+/// occurrence (research.md #5). `LocatedValue.value` is decoded exactly like
+/// `execute`'s own output (spec 1001-escape-sequence-decoding).
 pub fn execute_located<'m>(
     scan: &ScanResult<'m>,
     path: &CompiledPath<'_>,
@@ -266,16 +410,15 @@ pub(crate) fn resolve_field_values<'m>(
     segment_content: &'m str,
     segment_name: &str,
     delimiters: &DelimiterSet,
-) -> Vec<&'m str> {
+) -> Vec<Cow<'m, str>> {
     match field_expr {
-        None => vec![segment_content],
+        None => vec![decode_escapes(segment_content, delimiters)],
         Some(fe) => {
             let raw_field = field_at(segment_name, segment_content, delimiters.field, fe.field_num);
             let repetitions = split_bytes(raw_field, delimiters.repetition);
-            select_by_field_index(&repetitions, fe.index)
-                .into_iter()
-                .map(|rep| extract_component(rep, delimiters, fe.component, fe.subcomponent))
-                .collect()
+            select_and_map(&repetitions, fe.index, |rep| {
+                decode_escapes(extract_component(rep, delimiters, fe.component, fe.subcomponent), delimiters)
+            })
         }
     }
 }
@@ -298,17 +441,14 @@ pub(crate) fn resolve_field_values_located<'m>(
     delimiters: &DelimiterSet,
 ) -> Vec<LocatedValue<'m>> {
     match field_expr {
-        None => vec![LocatedValue { value: segment_content, line }],
+        None => vec![LocatedValue { value: decode_escapes(segment_content, delimiters), line }],
         Some(fe) => {
             let raw_field = field_at(segment_name, segment_content, delimiters.field, fe.field_num);
             let repetitions = split_bytes(raw_field, delimiters.repetition);
-            select_by_field_index(&repetitions, fe.index)
-                .into_iter()
-                .map(|rep| LocatedValue {
-                    value: extract_component(rep, delimiters, fe.component, fe.subcomponent),
-                    line,
-                })
-                .collect()
+            select_and_map(&repetitions, fe.index, |rep| LocatedValue {
+                value: decode_escapes(extract_component(rep, delimiters, fe.component, fe.subcomponent), delimiters),
+                line,
+            })
         }
     }
 }
@@ -332,20 +472,39 @@ fn field_at<'m>(segment_name: &str, segment_content: &'m str, field_sep: u8, fie
 }
 
 /// Resolves a field index selector (`FieldIndex`) against a field's
-/// `~`-delimited repetitions. An explicit `Numeric` index beyond what's
-/// present yields zero repetitions, not an error (research.md #2).
-fn select_by_field_index<'m>(repetitions: &[&'m str], index: Option<FieldIndex>) -> Vec<&'m str> {
+/// `~`-delimited repetitions, mapping each selected repetition through `f`
+/// and collecting directly into `Vec<T>` — never through an intermediate
+/// `Vec<&'m str>` first (pass `|s| s` for `T = &'m str`, the pre-spec-1001
+/// selection-only behavior this function used to be its own, separate
+/// `select_by_field_index`). An explicit `Numeric` index beyond what's
+/// present yields zero repetitions, not an error (research.md #2). Exists so
+/// `resolve_field_values`/`resolve_field_values_located` (spec
+/// 1001-escape-sequence-decoding) can select-and-decode a field's
+/// repetitions in exactly one allocation per call, matching this crate's
+/// pre-decoding allocation count exactly (research.md #1's fast path is
+/// necessary but not sufficient for that — mapping an already-materialized
+/// `Vec<&str>` into a differently-sized `Vec<Cow<str>>`/`Vec<LocatedValue>`
+/// can never reuse that Vec's buffer regardless of what the mapping
+/// function does internally, since the standard library's in-place-collect
+/// optimization requires equal element size; collecting directly from a
+/// slice iterator, as this function does, always costs exactly one
+/// allocation either way, so there is no fusion opportunity to lose).
+fn select_and_map<'m, T>(
+    repetitions: &[&'m str],
+    index: Option<FieldIndex>,
+    mut f: impl FnMut(&'m str) -> T,
+) -> Vec<T> {
     match index {
-        None | Some(FieldIndex::Star) => repetitions.to_vec(),
+        None | Some(FieldIndex::Star) => repetitions.iter().map(|rep| f(rep)).collect(),
         Some(FieldIndex::Numeric(n)) => {
             let idx = n as usize;
             if idx >= 1 && idx <= repetitions.len() {
-                vec![repetitions[idx - 1]]
+                vec![f(repetitions[idx - 1])]
             } else {
                 vec![]
             }
         }
-        Some(FieldIndex::Last) => repetitions.last().copied().into_iter().collect(),
+        Some(FieldIndex::Last) => repetitions.last().into_iter().map(|rep| f(rep)).collect(),
     }
 }
 
@@ -499,14 +658,14 @@ mod tests {
     #[test]
     fn field_index_numeric_selects_correct_repetition() {
         let repetitions = ["IgG", "IgM", "IgA"];
-        let selected = select_by_field_index(&repetitions, Some(FieldIndex::Numeric(2)));
+        let selected = select_and_map(&repetitions, Some(FieldIndex::Numeric(2)), |s| s);
         assert_eq!(selected, vec!["IgM"]);
     }
 
     #[test]
     fn field_index_last_selects_final_repetition() {
         let repetitions = ["IgG", "IgM", "IgA"];
-        let selected = select_by_field_index(&repetitions, Some(FieldIndex::Last));
+        let selected = select_and_map(&repetitions, Some(FieldIndex::Last), |s| s);
         assert_eq!(selected, vec!["IgA"]);
     }
 
@@ -514,10 +673,10 @@ mod tests {
     fn field_index_star_or_omitted_selects_every_repetition_in_order() {
         let repetitions = ["IgG", "IgM"];
         assert_eq!(
-            select_by_field_index(&repetitions, Some(FieldIndex::Star)),
+            select_and_map(&repetitions, Some(FieldIndex::Star), |s| s),
             vec!["IgG", "IgM"]
         );
-        assert_eq!(select_by_field_index(&repetitions, None), vec!["IgG", "IgM"]);
+        assert_eq!(select_and_map(&repetitions, None, |s| s), vec!["IgG", "IgM"]);
     }
 
     // research.md #2: an explicit out-of-range field/repetition index resolves
@@ -525,7 +684,7 @@ mod tests {
     #[test]
     fn field_index_numeric_out_of_range_is_empty_not_error() {
         let repetitions = ["IgG", "IgM"];
-        let selected = select_by_field_index(&repetitions, Some(FieldIndex::Numeric(5)));
+        let selected = select_and_map(&repetitions, Some(FieldIndex::Numeric(5)), |s| s);
         assert!(selected.is_empty());
     }
 
@@ -786,7 +945,7 @@ mod tests {
         assert_eq!(located.len(), 1, "expected exactly one OBR occurrence");
         assert_eq!(
             located[0],
-            vec![LocatedValue { value: "94500-6^Name^LN", line: 3 }],
+            vec![LocatedValue { value: Cow::Borrowed("94500-6^Name^LN"), line: 3 }],
             "OBR is the 3rd segment (MSH, PID, OBR)"
         );
     }
@@ -802,9 +961,9 @@ mod tests {
         let plain = execute(&scan_result, &path).unwrap();
         let located = execute_located(&scan_result, &path).unwrap();
 
-        let stripped: Vec<Vec<&str>> = located
+        let stripped: Vec<Vec<Cow<'_, str>>> = located
             .iter()
-            .map(|group| group.iter().map(|lv| lv.value).collect())
+            .map(|group| group.iter().map(|lv| lv.value.clone()).collect())
             .collect();
         assert_eq!(stripped, plain, "execute_located must agree with execute on values");
         // Both repetitions come from the same (only) OBX occurrence, line 2.
@@ -828,7 +987,7 @@ mod tests {
         let lines: Vec<usize> = located.iter().map(|group| group[0].line).collect();
         // MSH is line 1, so the three OBX occurrences are lines 2, 3, 4.
         assert_eq!(lines, vec![2, 3, 4], "each occurrence must carry its own, ascending, document-order line");
-        let values: Vec<&str> = located.iter().map(|group| group[0].value).collect();
+        let values: Vec<&str> = located.iter().map(|group| group[0].value.as_ref()).collect();
         assert_eq!(values, vec!["First", "Second", "Third"]);
     }
 
@@ -841,7 +1000,7 @@ mod tests {
 
         let located = execute_located(&scan_result, &path).unwrap();
         assert_eq!(located.len(), 1, "the filter must exclude the non-matching occurrence entirely");
-        assert_eq!(located[0], vec![LocatedValue { value: "Negative", line: 3 }]);
+        assert_eq!(located[0], vec![LocatedValue { value: Cow::Borrowed("Negative"), line: 3 }]);
     }
 
     // --- US3 (spec 1000, T013/T014): first_located ---
@@ -855,7 +1014,7 @@ mod tests {
         let all = execute_located(&scan_result, &path).unwrap();
         let first = first_located(&scan_result, &path).unwrap();
 
-        assert_eq!(first, Some(all[0][0]));
+        assert_eq!(first, Some(all[0][0].clone()));
     }
 
     #[test]
@@ -911,5 +1070,87 @@ mod tests {
             "allocation count must not scale with unrelated segment count — \
              execute_located() must not re-scan the full message per query (SC-004)"
         );
+    }
+
+    // --- US1 (spec 1001, T016-T021): decode_escapes algorithm ---
+
+    fn non_standard_delimiters() -> DelimiterSet {
+        DelimiterSet {
+            field: b'#',
+            component: b'@',
+            repetition: b'%',
+            escape: b'!',
+            subcomponent: b'$',
+        }
+    }
+
+    #[test]
+    fn decode_escapes_delimiter_sequences_use_the_messages_own_delimiters() {
+        let delimiters = standard_delimiters();
+        assert_eq!(decode_escapes("a\\F\\b", &delimiters), "a|b");
+        assert_eq!(decode_escapes("a\\S\\b", &delimiters), "a^b");
+        assert_eq!(decode_escapes("a\\T\\b", &delimiters), "a&b");
+        assert_eq!(decode_escapes("a\\R\\b", &delimiters), "a~b");
+        assert_eq!(decode_escapes("a\\E\\b", &delimiters), "a\\b");
+
+        // FR-002: decodes to THIS message's own delimiters, never hardcoded
+        // standard ones.
+        let nonstd = non_standard_delimiters();
+        assert_eq!(decode_escapes("a!F!b", &nonstd), "a#b");
+        assert_eq!(decode_escapes("a!S!b", &nonstd), "a@b");
+        assert_eq!(decode_escapes("a!T!b", &nonstd), "a$b");
+        assert_eq!(decode_escapes("a!R!b", &nonstd), "a%b");
+        assert_eq!(decode_escapes("a!E!b", &nonstd), "a!b");
+    }
+
+    #[test]
+    fn decode_escapes_removes_highlighting_markers_with_no_substitution() {
+        let delimiters = standard_delimiters();
+        assert_eq!(
+            decode_escapes("before\\H\\highlighted\\N\\after", &delimiters),
+            "beforehighlightedafter"
+        );
+    }
+
+    #[test]
+    fn decode_escapes_hex_sequence_decodes_to_represented_bytes() {
+        let delimiters = standard_delimiters();
+        // 48 65 6C 6C 6F = ASCII "Hello".
+        assert_eq!(decode_escapes("\\X48656C6C6F\\", &delimiters), "Hello");
+        // C3 A9 = UTF-8 for 'é', split across two consecutive hex pairs.
+        assert_eq!(decode_escapes("\\XC3A9\\", &delimiters), "é");
+    }
+
+    #[test]
+    fn decode_escapes_custom_sequence_passes_content_through_unchanged() {
+        let delimiters = standard_delimiters();
+        assert_eq!(decode_escapes("\\ZCUSTOM123\\", &delimiters), "CUSTOM123");
+        // Empty custom content is valid, decodes to nothing added.
+        assert_eq!(decode_escapes("a\\Z\\b", &delimiters), "ab");
+    }
+
+    #[test]
+    fn decode_escapes_malformed_sequences_are_left_completely_unmodified() {
+        let delimiters = standard_delimiters();
+        // Trailing, unterminated escape character.
+        assert_eq!(decode_escapes("text\\", &delimiters), "text\\");
+        // Unrecognized type-char.
+        assert_eq!(decode_escapes("a\\Q\\b", &delimiters), "a\\Q\\b");
+        // Odd number of hex digits.
+        assert_eq!(decode_escapes("\\X486\\", &delimiters), "\\X486\\");
+        // Hex bytes that don't form valid UTF-8 (0xFF is never a valid UTF-8
+        // lead or continuation byte on its own).
+        assert_eq!(decode_escapes("\\XFF\\", &delimiters), "\\XFF\\");
+    }
+
+    #[test]
+    fn decode_escapes_no_escape_byte_returns_borrowed_at_zero_allocations() {
+        let delimiters = standard_delimiters();
+        let allocs = count_allocs(|| {
+            let result = decode_escapes("plain text, no escapes here", &delimiters);
+            assert!(matches!(result, Cow::Borrowed(_)));
+            std::hint::black_box(&result);
+        });
+        assert_eq!(allocs, 0, "a value with no escape-delimiter byte must not allocate");
     }
 }

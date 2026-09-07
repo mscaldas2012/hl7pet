@@ -103,13 +103,13 @@ fn dispatch(vector: &HierarchyVector) {
     }
 }
 
-fn assert_get_value(id: &str, values: &[Vec<&str>], expected: &Value) {
+fn assert_get_value(id: &str, values: &[Vec<std::borrow::Cow<'_, str>>], expected: &Value) {
     match expected {
         Value::Null => assert!(values.is_empty(), "{id}: expected no match, got {values:?}"),
         Value::Array(outer) => {
             let actual: Vec<Vec<String>> = values
                 .iter()
-                .map(|inner| inner.iter().map(|s| s.to_string()).collect())
+                .map(|inner| inner.iter().map(|s| s.as_ref().to_string()).collect())
                 .collect();
             let expected_shape: Vec<Vec<String>> = outer
                 .iter()
@@ -128,8 +128,8 @@ fn assert_get_value(id: &str, values: &[Vec<&str>], expected: &Value) {
     }
 }
 
-fn assert_get_first_value(id: &str, values: &[Vec<&str>], expected: &Value) {
-    let actual = values.first().and_then(|reps| reps.first()).copied();
+fn assert_get_first_value(id: &str, values: &[Vec<std::borrow::Cow<'_, str>>], expected: &Value) {
+    let actual = values.first().and_then(|reps| reps.first()).map(|v| v.as_ref());
     match expected {
         Value::Null => assert!(actual.is_none(), "{id}: expected None, got {actual:?}"),
         Value::String(s) => assert_eq!(actual, Some(s.as_str()), "{id}: getFirstValue mismatch"),
