@@ -14,6 +14,7 @@ KNOWN_FAMILIES = {
     "path": "conformance-vector.schema.json",
     "hierarchy": "hierarchy-conformance-vector.schema.json",
     "scanner": "scanner-conformance-vector.schema.json",
+    "escapes": "escape-conformance-vector.schema.json",
 }
 
 # Coverage dimensions: which field on a vector record names the productions/rules
@@ -22,6 +23,7 @@ KNOWN_FAMILIES = {
 COVERAGE_FIELD = {
     "path": "grammar_productions",
     "hierarchy": "semantic_rules",
+    "escapes": "escape_types",
 }
 
 

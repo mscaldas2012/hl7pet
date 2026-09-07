@@ -86,7 +86,7 @@ fn run_get_first_value(results: &mut Vec<ResultRow>, message: &str, message_id: 
     let (timing, alloc) = measure_operation(DEFAULT_WARMUP_ITERS, DEFAULT_MEASURED_ITERS, || {
         hl7pet_core::execute(&scan_result, &compiled)
             .ok()
-            .and_then(|v| v.first().and_then(|reps| reps.first()).copied())
+            .and_then(|v| v.first().and_then(|reps| reps.first()).cloned())
     });
 
     results.push(ResultRow {

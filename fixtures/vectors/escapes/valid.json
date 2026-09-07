@@ -1,0 +1,50 @@
+[
+  {
+    "id": "escape-component-sep",
+    "path": "PID-5",
+    "message_ref": "messages/escapes/basic-escapes.hl7",
+    "method": "getValue",
+    "expected": [["SYNTHETIC^PATIENT"]],
+    "escape_types": ["S"]
+  },
+  {
+    "id": "escape-highlighting",
+    "path": "NTE[1]-3",
+    "message_ref": "messages/escapes/basic-escapes.hl7",
+    "method": "getValue",
+    "expected": [["Value is highlighted text"]],
+    "escape_types": ["H_N"]
+  },
+  {
+    "id": "escape-hex-decode",
+    "path": "NTE[2]-3",
+    "message_ref": "messages/escapes/basic-escapes.hl7",
+    "method": "getValue",
+    "expected": [["Encoded word is Hello and accented é char"]],
+    "escape_types": ["X"]
+  },
+  {
+    "id": "escape-custom-passthrough",
+    "path": "NTE[3]-3",
+    "message_ref": "messages/escapes/basic-escapes.hl7",
+    "method": "getValue",
+    "expected": [["Custom tag CUSTOM123 inline"]],
+    "escape_types": ["Z"]
+  },
+  {
+    "id": "escape-field-subcomp-rep-escape",
+    "path": "NTE[4]-3",
+    "message_ref": "messages/escapes/basic-escapes.hl7",
+    "method": "getValue",
+    "expected": [["Delims A|B&C~D\\E"]],
+    "escape_types": ["F", "T", "R", "E"]
+  },
+  {
+    "id": "escape-first-value-component-sep",
+    "path": "PID-5",
+    "message_ref": "messages/escapes/basic-escapes.hl7",
+    "method": "getFirstValue",
+    "expected": "SYNTHETIC^PATIENT",
+    "escape_types": ["S"]
+  }
+]

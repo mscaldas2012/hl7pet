@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mscaldas2012/hl7pet/specs/1001-escape-sequence-decoding/contracts/escape-conformance-vector.schema.json",
+  "title": "HL7-PET Escape-Sequence Decoding Conformance Vector",
+  "description": "Schema for a single escape-sequence-decoding conformance vector, as defined by spec 1001-escape-sequence-decoding. Distinct vector family from spec 001's path-*/spec 002's hier-*/spec 005's scan-* vectors (spec 003 FR-007 extensibility) since it exercises decode_escapes()'s output rather than pure PATH evaluation or scanning. Kept separate from fixtures/vectors/path/ deliberately: no message in that pre-existing corpus contains an escape sequence, and mixing them in would blur which vectors exist specifically to validate decoding. Consumed by fixtures/scripts/validate_corpus.py and crates/core/tests/escape_vectors.rs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "path", "message_ref", "method", "expected", "escape_types"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable, unique identifier for this vector within the whole suite, e.g. \"escape-field-sep\".",
+      "pattern": "^escape-[a-z0-9][a-z0-9-]*$"
+    },
+    "path": {
+      "type": "string",
+      "description": "The PATH expression under test, exactly as a caller would pass it (e.g. \"PID-5\")."
+    },
+    "message_ref": {
+      "type": "string",
+      "description": "Relative path (from fixtures/) to the synthetic source HL7 message file this vector is evaluated against. MUST point to a message satisfying spec 001 FR-009 (no real patient data)."
+    },
+    "method": {
+      "type": "string",
+      "enum": ["getValue", "getFirstValue"],
+      "description": "Which extraction method/variant this vector exercises."
+    },
+    "expected": {
+      "description": "Expected DECODED result. For getValue: a two-dimensional array (outer = segment occurrences, inner = field repetitions). For getFirstValue: a single string, or null if no match.",
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        { "type": "string" },
+        { "type": "null" }
+      ]
+    },
+    "escape_types": {
+      "type": "array",
+      "description": "Which documented escape-sequence type(s) this vector exercises (drives coverage tracking, mirroring spec 001's grammar_productions and spec 002's semantic_rules). H\\ and N\\ are tracked as one combined type since they only ever appear as a pair.",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": ["F", "S", "T", "R", "E", "H_N", "X", "Z"]
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "method": { "const": "getFirstValue" } }
+      },
+      "then": {
+        "properties": {
+          "expected": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "null" }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

@@ -42,6 +42,14 @@ counting-allocator harness — only one `#[global_allocator]` can exist per
 test binary, so both modules' allocation-count tests (spec 005/006 SC-004)
 call it rather than each declaring their own.
 
+## Breaking change: escape-sequence decoding (spec 1001)
+
+Every value-extraction function now decodes standard HL7 v2 escape sequences
+unconditionally — there is no opt-out. See
+[`MIGRATION.md`](MIGRATION.md) for exactly what changed and why, and
+[`../../specs/1001-escape-sequence-decoding/`](../../specs/1001-escape-sequence-decoding/)
+for the full spec.
+
 ## Performance validation
 
 `benches/` (spec [`009-core-perf-validation`](../../specs/009-core-perf-validation/))
