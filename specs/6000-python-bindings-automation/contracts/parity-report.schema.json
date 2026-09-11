@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mscaldas2012/hl7pet/specs/6000-python-bindings-automation/contracts/parity-report.schema.json",
+  "title": "HL7-PET Python Binding Parity Report",
+  "description": "Output schema for crates/python/tests/parity_check.py. See data-model.md Parity Report.",
+  "type": "object",
+  "required": ["run_at", "binding_commit", "totals", "results"],
+  "additionalProperties": false,
+  "properties": {
+    "run_at": { "type": "string", "format": "date-time" },
+    "binding_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "totals": {
+      "type": "object",
+      "required": ["match", "mismatch", "not_implemented"],
+      "additionalProperties": false,
+      "properties": {
+        "match": { "type": "integer", "minimum": 0 },
+        "mismatch": { "type": "integer", "minimum": 0 },
+        "not_implemented": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["vector_id", "family", "status", "expected", "actual"],
+        "additionalProperties": false,
+        "properties": {
+          "vector_id": { "type": "string" },
+          "family": { "enum": ["path", "hierarchy", "scanner", "escapes"] },
+          "status": { "enum": ["match", "mismatch", "not_implemented"] },
+          "expected": {},
+          "actual": {}
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "status": { "const": "not_implemented" } } },
+            "then": { "properties": { "actual": { "const": null } } }
+          }
+        ]
+      }
+    }
+  }
+}

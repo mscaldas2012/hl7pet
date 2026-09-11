@@ -1,0 +1,190 @@
+{
+  "commit": "653447ea405a3f4c34481e56499b67c914f6c730",
+  "captured_at": "2026-09-10T19:46:31Z",
+  "surface": {
+    "hierarchy": {
+      "functions": {
+        "execute_hierarchy": "fn execute_hierarchy < 'm > (scan : & ScanResult < 'm > , path : & CompiledPath < '_ > , profile : Option < & HierarchyProfile > ,) -> Result < Vec < Vec < Cow < 'm , str > > > , QueryError >"
+      },
+      "structs": {
+        "HierarchyProfile": {
+          "fields": {}
+        }
+      },
+      "enums": {
+        "ProfileError": {
+          "variants": [
+            "InvalidJson { message: String }"
+          ]
+        }
+      }
+    },
+    "parser": {
+      "functions": {
+        "parse": "fn parse (path : & str) -> Result < CompiledPath < '_ > , ParseError >"
+      },
+      "structs": {
+        "ChildPath": {
+          "fields": {
+            "field": "Option < FieldExpr >",
+            "segment": "SegmentExpr < 'a >"
+          }
+        },
+        "CompiledPath": {
+          "fields": {
+            "child": "Option < ChildPath < 'a > >",
+            "field": "Option < FieldExpr >",
+            "segment": "SegmentExpr < 'a >",
+            "source": "& 'a str"
+          }
+        },
+        "FieldExpr": {
+          "fields": {
+            "component": "Option < u32 >",
+            "field_num": "u32",
+            "index": "Option < FieldIndex >",
+            "subcomponent": "Option < u32 >"
+          }
+        },
+        "FilterClause": {
+          "fields": {
+            "component": "Option < u32 >",
+            "field_num": "u32",
+            "operator": "FilterOperator",
+            "subcomponent": "Option < u32 >",
+            "values": "Vec < & 'a str >"
+          }
+        },
+        "ParseError": {
+          "fields": {
+            "kind": "ParseErrorKind",
+            "offset": "usize"
+          }
+        },
+        "SegmentExpr": {
+          "fields": {
+            "index": "Option < SegIndex < 'a > >",
+            "name": "& 'a str"
+          }
+        }
+      },
+      "enums": {
+        "FieldIndex": {
+          "variants": [
+            "Last",
+            "Numeric(u32)",
+            "Star"
+          ]
+        },
+        "FilterOperator": {
+          "variants": [
+            "Eq",
+            "Ge",
+            "Gt",
+            "Le",
+            "Lt",
+            "Ne"
+          ]
+        },
+        "ParseErrorKind": {
+          "variants": [
+            "InvalidFieldIndex",
+            "InvalidOperator",
+            "InvalidSegIndex",
+            "InvalidSegmentName",
+            "MultipleHierarchyHops",
+            "TrailingInput",
+            "UnexpectedEnd",
+            "UnexpectedSeparator",
+            "UnterminatedFilter"
+          ]
+        },
+        "SegIndex": {
+          "variants": [
+            "Filter(FilterClause < 'a >)",
+            "Last",
+            "Numeric(u32)",
+            "Star"
+          ]
+        }
+      }
+    },
+    "query": {
+      "functions": {
+        "execute": "fn execute < 'm > (scan : & ScanResult < 'm > , path : & CompiledPath < '_ > ,) -> Result < Vec < Vec < Cow < 'm , str > > > , QueryError >",
+        "execute_located": "fn execute_located < 'm > (scan : & ScanResult < 'm > , path : & CompiledPath < '_ > ,) -> Result < Vec < Vec < LocatedValue < 'm > > > , QueryError >",
+        "first_located": "fn first_located < 'm > (scan : & ScanResult < 'm > , path : & CompiledPath < '_ > ,) -> Result < Option < LocatedValue < 'm > > , QueryError >"
+      },
+      "structs": {
+        "LocatedValue": {
+          "fields": {
+            "line": "usize",
+            "value": "Cow < 'm , str >"
+          }
+        }
+      },
+      "enums": {
+        "QueryError": {
+          "variants": [
+            "NonNumericComparison { operator: FilterOperator }"
+          ]
+        }
+      }
+    },
+    "scanner": {
+      "functions": {
+        "scan": "fn scan (message : & str) -> Result < ScanResult < '_ > , ScanError >"
+      },
+      "structs": {
+        "DelimiterOccurrence": {
+          "fields": {
+            "kind": "DelimiterKind",
+            "offset": "usize",
+            "segment_index": "usize"
+          }
+        },
+        "DelimiterSet": {
+          "fields": {
+            "component": "u8",
+            "escape": "u8",
+            "field": "u8",
+            "repetition": "u8",
+            "subcomponent": "u8"
+          }
+        },
+        "ScanResult": {
+          "fields": {
+            "delimiter_occurrences": "Vec < DelimiterOccurrence >",
+            "delimiters": "DelimiterSet",
+            "message": "& 'a str",
+            "segments": "Vec < SegmentSpan >"
+          }
+        },
+        "SegmentSpan": {
+          "fields": {
+            "end": "usize",
+            "start": "usize"
+          }
+        }
+      },
+      "enums": {
+        "DelimiterKind": {
+          "variants": [
+            "Component",
+            "Escape",
+            "Field",
+            "Repetition",
+            "Subcomponent"
+          ]
+        },
+        "ScanError": {
+          "variants": [
+            "MissingMsh { offset: usize }",
+            "TruncatedMsh { offset: usize }",
+            "UnrecognizedSegment { offset: usize, segment_index: usize }"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -66,7 +66,21 @@ struct PartialResults {
 /// directory); otherwise today's date, shelling out to `date +%F` rather than
 /// adding a date/time crate dependency — the same format `quickstart.md`
 /// already uses for this directory name.
+///
+/// `PERF_RUN_OUTPUT_DIR`, if set, is used directly as the run directory
+/// instead of the `specs/009-core-perf-validation/comparison/<run-date>`
+/// default — spec `6001-python-ffi-benchmark`'s own re-run needs its fresh
+/// Rust baseline written under *its* directory, not spec `009`'s (that
+/// spec's FR-009/FR-011 equivalent — never overwrite another spec's
+/// committed artifacts). When unset, behavior is byte-for-byte unchanged,
+/// so spec `009`'s own existing workflow needs no changes at all.
 fn run_dir() -> PathBuf {
+    if let Ok(dir) = std::env::var("PERF_RUN_OUTPUT_DIR") {
+        let dir = PathBuf::from(dir);
+        fs::create_dir_all(&dir).unwrap_or_else(|e| panic!("creating {}: {e}", dir.display()));
+        return dir;
+    }
+
     let run_date = std::env::var("PERF_RUN_DATE").unwrap_or_else(|_| {
         let output = Command::new("date")
             .arg("+%F")

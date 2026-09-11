@@ -1,0 +1,900 @@
+{
+  "runDate": "2026-09-11",
+  "corpusId": "perf-v2",
+  "pythonEngineVersion": "0.1.0",
+  "rustEngineVersion": "0.1.0",
+  "pythonHostEnvironment": {
+    "os": "Darwin",
+    "arch": "arm64"
+  },
+  "rustHostEnvironment": {
+    "os": "macos",
+    "arch": "aarch64"
+  },
+  "notComparableMetrics": [
+    "allocationBytesPerOp",
+    "allocationCallCount",
+    "memoryAllocRateBytesPerSec"
+  ],
+  "results": [
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PID-5.1",
+      "metric": "throughput",
+      "pythonValue": 0.5863200452678015,
+      "rustValue": 2.610420799832933,
+      "unit": "ops/us",
+      "penaltyRatio": 4.4522114174701715
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP50",
+      "pythonValue": 1.6670674085617065,
+      "rustValue": 0.375,
+      "unit": "us",
+      "penaltyRatio": 4.445513089497884
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP95",
+      "pythonValue": 1.7919810488820076,
+      "rustValue": 0.417,
+      "unit": "us",
+      "penaltyRatio": 4.2973166639856295
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": "PID-5.1",
+      "metric": "throughput",
+      "pythonValue": 0.7309028763076582,
+      "rustValue": 3.457432096033634,
+      "unit": "ops/us",
+      "penaltyRatio": 4.730357764494966
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP50",
+      "pythonValue": 1.374981366097927,
+      "rustValue": 0.29200000000000004,
+      "unit": "us",
+      "penaltyRatio": 4.708840294855914
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP95",
+      "pythonValue": 1.4170072972774506,
+      "rustValue": 0.33299999999999996,
+      "unit": "us",
+      "penaltyRatio": 4.255277169001354
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PID-5.1",
+      "metric": "throughput",
+      "pythonValue": 0.5919041634401098,
+      "rustValue": 2.8072697056296985,
+      "unit": "ops/us",
+      "penaltyRatio": 4.742777427538309
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP50",
+      "pythonValue": 1.6670674085617065,
+      "rustValue": 0.375,
+      "unit": "us",
+      "penaltyRatio": 4.445513089497884
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP95",
+      "pythonValue": 1.70909333974123,
+      "rustValue": 0.375,
+      "unit": "us",
+      "penaltyRatio": 4.557582239309947
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "PID-5.1",
+      "metric": "throughput",
+      "pythonValue": 0.488551240144726,
+      "rustValue": 3.002137521915604,
+      "unit": "ops/us",
+      "penaltyRatio": 6.144979840858178
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP50",
+      "pythonValue": 2.00001522898674,
+      "rustValue": 0.33299999999999996,
+      "unit": "us",
+      "penaltyRatio": 6.00605173869892
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP95",
+      "pythonValue": 2.4168984964489937,
+      "rustValue": 0.375,
+      "unit": "us",
+      "penaltyRatio": 6.445062657197316
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "PID-5.1",
+      "metric": "throughput",
+      "pythonValue": 0.3869739430755644,
+      "rustValue": 2.7801563559934612,
+      "unit": "ops/us",
+      "penaltyRatio": 7.18435027923981
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP50",
+      "pythonValue": 2.459040842950344,
+      "rustValue": 0.375,
+      "unit": "us",
+      "penaltyRatio": 6.557442247867584
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP95",
+      "pythonValue": 2.8329668566584587,
+      "rustValue": 0.375,
+      "unit": "us",
+      "penaltyRatio": 7.554578284422557
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "PID-5.1",
+      "metric": "throughput",
+      "pythonValue": 0.4328922934606762,
+      "rustValue": 2.890290358569422,
+      "unit": "ops/us",
+      "penaltyRatio": 6.676696264245173
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP50",
+      "pythonValue": 2.2919848561286926,
+      "rustValue": 0.334,
+      "unit": "us",
+      "penaltyRatio": 6.862230108169738
+    },
+    {
+      "feature": "getFirstValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "PID-5.1",
+      "metric": "latencyP95",
+      "pythonValue": 2.374988980591297,
+      "rustValue": 0.375,
+      "unit": "us",
+      "penaltyRatio": 6.333303948243459
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PV1-3.1",
+      "metric": "throughput",
+      "pythonValue": 0.5937985250457691,
+      "rustValue": 3.4001346453319554,
+      "unit": "ops/us",
+      "penaltyRatio": 5.726074589137583
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PV1-3.1",
+      "metric": "latencyP50",
+      "pythonValue": 1.6670674085617065,
+      "rustValue": 0.29200000000000004,
+      "unit": "us",
+      "penaltyRatio": 5.709134960827761
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PV1-3.1",
+      "metric": "latencyP95",
+      "pythonValue": 1.70909333974123,
+      "rustValue": 0.334,
+      "unit": "us",
+      "penaltyRatio": 5.1170459273689515
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PV1[1]-3.1",
+      "metric": "throughput",
+      "pythonValue": 0.5760994691930643,
+      "rustValue": 3.3540614329892064,
+      "unit": "ops/us",
+      "penaltyRatio": 5.822017919383263
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PV1[1]-3.1",
+      "metric": "latencyP50",
+      "pythonValue": 1.7080456018447876,
+      "rustValue": 0.29200000000000004,
+      "unit": "us",
+      "penaltyRatio": 5.849471239194477
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a01_001",
+      "pathExpression": "PV1[1]-3.1",
+      "metric": "latencyP95",
+      "pythonValue": 1.750071533024311,
+      "rustValue": 0.33299999999999996,
+      "unit": "us",
+      "penaltyRatio": 5.255470069142076
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PV1-3.1",
+      "metric": "throughput",
+      "pythonValue": 0.5956069108678218,
+      "rustValue": 3.7324295877158282,
+      "unit": "ops/us",
+      "penaltyRatio": 6.2665988584275105
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PV1-3.1",
+      "metric": "latencyP50",
+      "pythonValue": 1.6670674085617065,
+      "rustValue": 0.25,
+      "unit": "us",
+      "penaltyRatio": 6.668269634246826
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PV1-3.1",
+      "metric": "latencyP95",
+      "pythonValue": 1.708976924419403,
+      "rustValue": 0.29200000000000004,
+      "unit": "us",
+      "penaltyRatio": 5.852660700066449
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PV1[1]-3.1",
+      "metric": "throughput",
+      "pythonValue": 0.5680070716427021,
+      "rustValue": 3.4711856876071727,
+      "unit": "ops/us",
+      "penaltyRatio": 6.111166323278946
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PV1[1]-3.1",
+      "metric": "latencyP50",
+      "pythonValue": 1.750071533024311,
+      "rustValue": 0.29200000000000004,
+      "unit": "us",
+      "penaltyRatio": 5.99339566104216
+    },
+    {
+      "feature": "getValue",
+      "messageId": "adt_a08_002",
+      "pathExpression": "PV1[1]-3.1",
+      "metric": "latencyP95",
+      "pythonValue": 1.8330756574869156,
+      "rustValue": 0.33299999999999996,
+      "unit": "us",
+      "penaltyRatio": 5.504731704164913
+    },
+    {
+      "feature": "getValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "OBR-4.2",
+      "metric": "throughput",
+      "pythonValue": 0.4707497029431671,
+      "rustValue": 5.117916803144448,
+      "unit": "ops/us",
+      "penaltyRatio": 10.871842873499013
+    },
+    {
+      "feature": "getValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "OBR-4.2",
+      "metric": "latencyP50",
+      "pythonValue": 2.0419247448444366,
+      "rustValue": 0.20800000000000002,
+      "unit": "us",
+      "penaltyRatio": 9.816945888675175
+    },
+    {
+      "feature": "getValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "OBR-4.2",
+      "metric": "latencyP95",
+      "pythonValue": 2.540997229516506,
+      "rustValue": 0.20900000000000002,
+      "unit": "us",
+      "penaltyRatio": 12.15788148094022
+    },
+    {
+      "feature": "getValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "OBR[1]-4.2",
+      "metric": "throughput",
+      "pythonValue": 0.4857983266693436,
+      "rustValue": 4.480607928883791,
+      "unit": "ops/us",
+      "penaltyRatio": 9.223185183866425
+    },
+    {
+      "feature": "getValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "OBR[1]-4.2",
+      "metric": "latencyP50",
+      "pythonValue": 2.0420411601662636,
+      "rustValue": 0.20900000000000002,
+      "unit": "us",
+      "penaltyRatio": 9.770531866824227
+    },
+    {
+      "feature": "getValue",
+      "messageId": "orm_o01_005",
+      "pathExpression": "OBR[1]-4.2",
+      "metric": "latencyP95",
+      "pythonValue": 2.084067091345787,
+      "rustValue": 0.25,
+      "unit": "us",
+      "penaltyRatio": 8.336268365383148
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "OBX-5",
+      "metric": "throughput",
+      "pythonValue": 0.3531295654162907,
+      "rustValue": 1.7094133976984458,
+      "unit": "ops/us",
+      "penaltyRatio": 4.840754117212715
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "OBX-5",
+      "metric": "latencyP50",
+      "pythonValue": 2.7919886633753777,
+      "rustValue": 0.583,
+      "unit": "us",
+      "penaltyRatio": 4.7890028531310085
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "OBX-5",
+      "metric": "latencyP95",
+      "pythonValue": 2.91608739644289,
+      "rustValue": 0.625,
+      "unit": "us",
+      "penaltyRatio": 4.665739834308624
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "OBX[1]-5",
+      "metric": "throughput",
+      "pythonValue": 0.41387665225491255,
+      "rustValue": 3.950039895402943,
+      "unit": "ops/us",
+      "penaltyRatio": 9.54400272129885
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "OBX[1]-5",
+      "metric": "latencyP50",
+      "pythonValue": 2.4170149117708206,
+      "rustValue": 0.25,
+      "unit": "us",
+      "penaltyRatio": 9.668059647083282
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "OBX[1]-5",
+      "metric": "latencyP95",
+      "pythonValue": 2.4581095203757286,
+      "rustValue": 0.29200000000000004,
+      "unit": "us",
+      "penaltyRatio": 8.418183288957973
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "OBX[@1='1']-5",
+      "metric": "throughput",
+      "pythonValue": 0.3479837043540344,
+      "rustValue": 1.474013148197282,
+      "unit": "ops/us",
+      "penaltyRatio": 4.235868317263612
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "OBX[@1='1']-5",
+      "metric": "latencyP50",
+      "pythonValue": 2.874992787837982,
+      "rustValue": 0.667,
+      "unit": "us",
+      "penaltyRatio": 4.310334014749598
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_003",
+      "pathExpression": "OBX[@1='1']-5",
+      "metric": "latencyP95",
+      "pythonValue": 2.9170187190175056,
+      "rustValue": 0.709,
+      "unit": "us",
+      "penaltyRatio": 4.114271818078287
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": "OBX-5",
+      "metric": "throughput",
+      "pythonValue": 0.02511483044603267,
+      "rustValue": 0.061735597548109,
+      "unit": "ops/us",
+      "penaltyRatio": 2.4581331608337105
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": "OBX-5",
+      "metric": "latencyP50",
+      "pythonValue": 38.83393947035074,
+      "rustValue": 15.334,
+      "unit": "us",
+      "penaltyRatio": 2.532538115974354
+    },
+    {
+      "feature": "getValue",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": "OBX-5",
+      "metric": "latencyP95",
+      "pythonValue": 43.208012357354164,
+      "rustValue": 17.709,
+      "unit": "us",
+      "penaltyRatio": 2.4398900196145554
+    },
+    {
+      "feature": "getValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "RXA-5.2",
+      "metric": "throughput",
+      "pythonValue": 0.3886018979841225,
+      "rustValue": 3.03931044124709,
+      "unit": "ops/us",
+      "penaltyRatio": 7.8211415255909795
+    },
+    {
+      "feature": "getValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "RXA-5.2",
+      "metric": "latencyP50",
+      "pythonValue": 2.458924427628517,
+      "rustValue": 0.33299999999999996,
+      "unit": "us",
+      "penaltyRatio": 7.384157440325878
+    },
+    {
+      "feature": "getValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "RXA-5.2",
+      "metric": "latencyP95",
+      "pythonValue": 3.00002284348011,
+      "rustValue": 0.334,
+      "unit": "us",
+      "penaltyRatio": 8.982104321796736
+    },
+    {
+      "feature": "getValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "RXA[1]-5.2",
+      "metric": "throughput",
+      "pythonValue": 0.40132169893336384,
+      "rustValue": 2.8155848251240267,
+      "unit": "ops/us",
+      "penaltyRatio": 7.015780189826046
+    },
+    {
+      "feature": "getValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "RXA[1]-5.2",
+      "metric": "latencyP50",
+      "pythonValue": 2.499902620911598,
+      "rustValue": 0.334,
+      "unit": "us",
+      "penaltyRatio": 7.484738385962869
+    },
+    {
+      "feature": "getValue",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "RXA[1]-5.2",
+      "metric": "latencyP95",
+      "pythonValue": 2.624932676553726,
+      "rustValue": 0.375,
+      "unit": "us",
+      "penaltyRatio": 6.9998204708099365
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR -> OBX-5",
+      "metric": "throughput",
+      "pythonValue": 0.018989182914173293,
+      "rustValue": 0.050929649449185654,
+      "unit": "ops/us",
+      "penaltyRatio": 2.682034802622939
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR -> OBX-5",
+      "metric": "latencyP50",
+      "pythonValue": 52.416929975152016,
+      "rustValue": 18.791999999999998,
+      "unit": "us",
+      "penaltyRatio": 2.789321518473394
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR -> OBX-5",
+      "metric": "latencyP95",
+      "pythonValue": 57.87494592368603,
+      "rustValue": 23.791999999999998,
+      "unit": "us",
+      "penaltyRatio": 2.4325380768193523
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX-5",
+      "metric": "throughput",
+      "pythonValue": 0.03330625615676067,
+      "rustValue": 0.6108310111574392,
+      "unit": "ops/us",
+      "penaltyRatio": 18.339828057602013
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX-5",
+      "metric": "latencyP50",
+      "pythonValue": 29.333983547985554,
+      "rustValue": 1.625,
+      "unit": "us",
+      "penaltyRatio": 18.051682183375725
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX-5",
+      "metric": "latencyP95",
+      "pythonValue": 33.250078558921814,
+      "rustValue": 1.709,
+      "unit": "us",
+      "penaltyRatio": 19.455868085969463
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[3]-5",
+      "metric": "throughput",
+      "pythonValue": 0.032736689446545425,
+      "rustValue": 1.2410982229955645,
+      "unit": "ops/us",
+      "penaltyRatio": 37.911537298910744
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[3]-5",
+      "metric": "latencyP50",
+      "pythonValue": 30.04202153533697,
+      "rustValue": 0.791,
+      "unit": "us",
+      "penaltyRatio": 37.97979966540704
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[3]-5",
+      "metric": "latencyP95",
+      "pythonValue": 33.45799632370472,
+      "rustValue": 0.916,
+      "unit": "us",
+      "penaltyRatio": 36.526196859939645
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[@5='VAL-1-2']-5",
+      "metric": "throughput",
+      "pythonValue": 0.0331866030991439,
+      "rustValue": 0.6286042596739052,
+      "unit": "ops/us",
+      "penaltyRatio": 18.941506540936725
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[@5='VAL-1-2']-5",
+      "metric": "latencyP50",
+      "pythonValue": 29.374961741268635,
+      "rustValue": 1.584,
+      "unit": "us",
+      "penaltyRatio": 18.544799079083734
+    },
+    {
+      "feature": "hierarchy",
+      "messageId": "large_hierarchy_028",
+      "pathExpression": "OBR[1] -> OBX[@5='VAL-1-2']-5",
+      "metric": "latencyP95",
+      "pythonValue": 32.24995452910662,
+      "rustValue": 1.709,
+      "unit": "us",
+      "penaltyRatio": 18.870658004158347
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_001",
+      "pathExpression": "MSH-1",
+      "metric": "throughput",
+      "pythonValue": 0.6046029988818631,
+      "rustValue": 0.8346548702111678,
+      "unit": "ops/us",
+      "penaltyRatio": 1.3805007116318586
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_001",
+      "pathExpression": "MSH-1",
+      "metric": "latencyP50",
+      "pythonValue": 1.625041477382183,
+      "rustValue": 1.208,
+      "unit": "us",
+      "penaltyRatio": 1.3452330110779662
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_001",
+      "pathExpression": "MSH-1",
+      "metric": "latencyP95",
+      "pythonValue": 1.7080456018447876,
+      "rustValue": 1.25,
+      "unit": "us",
+      "penaltyRatio": 1.36643648147583
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": "MSH-1",
+      "metric": "throughput",
+      "pythonValue": 0.8418018451966558,
+      "rustValue": 1.2615590346550267,
+      "unit": "ops/us",
+      "penaltyRatio": 1.4986413273545514
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": "MSH-1",
+      "metric": "latencyP50",
+      "pythonValue": 1.1669471859931946,
+      "rustValue": 0.792,
+      "unit": "us",
+      "penaltyRatio": 1.4734181641328215
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a01_minimal_027",
+      "pathExpression": "MSH-1",
+      "metric": "latencyP95",
+      "pythonValue": 1.4579854905605316,
+      "rustValue": 0.792,
+      "unit": "us",
+      "penaltyRatio": 1.8408907709097622
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a08_002",
+      "pathExpression": "MSH-1",
+      "metric": "throughput",
+      "pythonValue": 0.623700735217345,
+      "rustValue": 0.8193833321042583,
+      "unit": "ops/us",
+      "penaltyRatio": 1.3137443742450015
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a08_002",
+      "pathExpression": "MSH-1",
+      "metric": "latencyP50",
+      "pythonValue": 1.6249250620603561,
+      "rustValue": 1.209,
+      "unit": "us",
+      "penaltyRatio": 1.3440240380978958
+    },
+    {
+      "feature": "parsing",
+      "messageId": "adt_a08_002",
+      "pathExpression": "MSH-1",
+      "metric": "latencyP95",
+      "pythonValue": 1.6670674085617065,
+      "rustValue": 1.25,
+      "unit": "us",
+      "penaltyRatio": 1.3336539268493652
+    },
+    {
+      "feature": "parsing",
+      "messageId": "orm_o01_005",
+      "pathExpression": "MSH-1",
+      "metric": "throughput",
+      "pythonValue": 0.5309242288096885,
+      "rustValue": 0.635193263902475,
+      "unit": "ops/us",
+      "penaltyRatio": 1.1963915553949265
+    },
+    {
+      "feature": "parsing",
+      "messageId": "orm_o01_005",
+      "pathExpression": "MSH-1",
+      "metric": "latencyP50",
+      "pythonValue": 1.8749851733446121,
+      "rustValue": 1.583,
+      "unit": "us",
+      "penaltyRatio": 1.1844505201166218
+    },
+    {
+      "feature": "parsing",
+      "messageId": "orm_o01_005",
+      "pathExpression": "MSH-1",
+      "metric": "latencyP95",
+      "pythonValue": 1.9170111045241356,
+      "rustValue": 1.625,
+      "unit": "us",
+      "penaltyRatio": 1.179699141245622
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_003",
+      "pathExpression": "MSH-1",
+      "metric": "throughput",
+      "pythonValue": 0.4154832683758911,
+      "rustValue": 0.4835585265391425,
+      "unit": "ops/us",
+      "penaltyRatio": 1.1638459676832598
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_003",
+      "pathExpression": "MSH-1",
+      "metric": "latencyP50",
+      "pythonValue": 2.375105395913124,
+      "rustValue": 2.0829999999999997,
+      "unit": "us",
+      "penaltyRatio": 1.1402330273226713
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_003",
+      "pathExpression": "MSH-1",
+      "metric": "latencyP95",
+      "pythonValue": 2.4170149117708206,
+      "rustValue": 2.125,
+      "unit": "us",
+      "penaltyRatio": 1.1374187820097978
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": "MSH-1",
+      "metric": "throughput",
+      "pythonValue": 0.05145262524254347,
+      "rustValue": 0.054855128702200065,
+      "unit": "ops/us",
+      "penaltyRatio": 1.066128860162479
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": "MSH-1",
+      "metric": "latencyP50",
+      "pythonValue": 19.291997887194157,
+      "rustValue": 17.75,
+      "unit": "us",
+      "penaltyRatio": 1.0868731204053046
+    },
+    {
+      "feature": "parsing",
+      "messageId": "oru_r01_large_026",
+      "pathExpression": "MSH-1",
+      "metric": "latencyP95",
+      "pythonValue": 20.165927708148956,
+      "rustValue": 20.792,
+      "unit": "us",
+      "penaltyRatio": 0.9698887893492186
+    },
+    {
+      "feature": "parsing",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "MSH-1",
+      "metric": "throughput",
+      "pythonValue": 0.45260154037441974,
+      "rustValue": 0.5304026817159588,
+      "unit": "ops/us",
+      "penaltyRatio": 1.1718976503641088
+    },
+    {
+      "feature": "parsing",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "MSH-1",
+      "metric": "latencyP50",
+      "pythonValue": 2.2080494090914726,
+      "rustValue": 1.875,
+      "unit": "us",
+      "penaltyRatio": 1.1776263515154521
+    },
+    {
+      "feature": "parsing",
+      "messageId": "vxu_v04_004",
+      "pathExpression": "MSH-1",
+      "metric": "latencyP95",
+      "pythonValue": 2.250075340270996,
+      "rustValue": 1.917,
+      "unit": "us",
+      "penaltyRatio": 1.17374822132029
+    }
+  ],
+  "engineFailures": [],
+  "scalingCheck": {
+    "feature": "getValue",
+    "pathExpression": "OBX-5",
+    "typicalMessageId": "oru_r01_003",
+    "largeMessageId": "oru_r01_large_026",
+    "typicalPenaltyRatio": 4.840754117212715,
+    "largePenaltyRatio": 2.4581331608337105
+  }
+}

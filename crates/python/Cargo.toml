@@ -1,0 +1,12 @@
+[package]
+name = "hl7pet-python"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "_hl7pet"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.29", features = ["abi3-py39"] }
+hl7pet-core = { path = "../core" }
