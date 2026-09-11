@@ -1,0 +1,18 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "hl7pet"
+version = "0.1.0"
+description = "Python bindings for hl7pet-core: fast, zero-copy HL7 v2 PATH extraction."
+requires-python = ">=3.9"
+classifiers = [
+  "Programming Language :: Rust",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+
+[tool.maturin]
+module-name = "hl7pet._hl7pet"
+python-source = "python"
+features = ["pyo3/extension-module"]

@@ -103,18 +103,15 @@ bindings in their own number ranges.
 
 ## Current Status
 
-**Spec `001` (PATH grammar specification) is complete.** See
-[specs/001-path-grammar-spec/](specs/001-path-grammar-spec/) for:
-
-- The formal PATH grammar ([contracts/path-grammar.md](specs/001-path-grammar-spec/contracts/path-grammar.md))
-- A JSON Schema for machine-checkable conformance vectors
-- 17 conformance vectors, verified against the real Scala library with zero
-  discrepancies
-
-Everything downstream of it — the Rust message scanner, PATH parser, query
-executor, and eventually the Python/Java bindings — is planned but not yet
-started. See [ROADMAP.md](ROADMAP.md) for the full module breakdown and what's
-next.
+The Rust core (`crates/core`, `hl7pet-core`) is implemented: message
+scanning, PATH parsing, query execution, lazy hierarchy navigation, located
+extraction, and escape-sequence decoding, all verified against the real
+Scala library. A Python binding now sits on top of it — see
+[crates/python/README.md](crates/python/README.md) for install/quickstart —
+along with `crates/xtask`, the maintainer tooling that keeps the binding in
+sync with `hl7pet-core` as it grows. The Java binding and Arrow output are
+still ahead. See [ROADMAP.md](ROADMAP.md) for the full module breakdown,
+per-spec status, and what's next.
 
 ## Contributing
 

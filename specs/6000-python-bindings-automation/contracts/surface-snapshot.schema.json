@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mscaldas2012/hl7pet/specs/6000-python-bindings-automation/contracts/surface-snapshot.schema.json",
+  "title": "HL7-PET xtask Surface Snapshot / Change Report",
+  "description": "Shared schema for crates/xtask/surface-baseline.json (a snapshot, the 'surface' field only) and the `xtask surface-diff` command's output (a full change report). See data-model.md Sync Baseline / Surface Change Report.",
+  "$defs": {
+    "signature_map": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "description": "item name -> normalized signature string"
+    },
+    "struct_def": {
+      "type": "object",
+      "required": ["fields"],
+      "additionalProperties": false,
+      "properties": {
+        "fields": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "enum_def": {
+      "type": "object",
+      "required": ["variants"],
+      "additionalProperties": false,
+      "properties": {
+        "variants": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "module_surface": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "functions": { "$ref": "#/$defs/signature_map" },
+        "structs": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/struct_def" }
+        },
+        "enums": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/enum_def" }
+        },
+        "types": { "$ref": "#/$defs/signature_map" }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "title": "Baseline snapshot (crates/xtask/surface-baseline.json)",
+      "type": "object",
+      "required": ["commit", "surface"],
+      "additionalProperties": false,
+      "properties": {
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "captured_at": { "type": "string", "format": "date-time" },
+        "surface": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/module_surface" }
+        }
+      }
+    },
+    {
+      "title": "Surface Change Report (xtask surface-diff output)",
+      "type": "object",
+      "required": ["baseline_commit", "current_commit", "up_to_date", "changes"],
+      "additionalProperties": false,
+      "properties": {
+        "baseline_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "current_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "up_to_date": { "type": "boolean" },
+        "changes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "kind", "classification", "item_path", "before", "after",
+              "requires_version_bump", "requires_migration_note"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "kind": { "enum": ["added", "changed", "removed"] },
+              "classification": {
+                "enum": ["backward_compatible_addition", "documented_breaking_change"]
+              },
+              "item_path": { "type": "string" },
+              "before": { "type": ["string", "null"] },
+              "after": { "type": ["string", "null"] },
+              "requires_version_bump": { "type": "boolean" },
+              "requires_migration_note": { "type": "boolean" }
+            },
+            "allOf": [
+              {
+                "if": { "properties": { "kind": { "const": "added" } } },
+                "then": {
+                  "properties": {
+                    "before": { "const": null },
+                    "classification": { "const": "backward_compatible_addition" }
+                  }
+                }
+              },
+              {
+                "if": { "properties": { "kind": { "const": "removed" } } },
+                "then": {
+                  "properties": {
+                    "after": { "const": null },
+                    "classification": { "const": "documented_breaking_change" }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
