@@ -115,14 +115,17 @@ again (already public from `hl7pet_core::query`).
 - Cardinality validation of any kind (`[m..n]` enforcement) — Roadmap 2000-2999's
   `StructureValidator`, unrelated to navigation (spec `002` Section A.3, carried
   forward unchanged by this spec).
-- Resolving an **ambiguous parent-side type** — a segment type used as a `->`
-  expression's parent that occupies more than one position in `segmentDefinition` —
-  via history-dependent disambiguation. `node_for` (data-model.md) returns `None`
-  for this case, folding into FR-006's "no qualifying children" outcome, same as an
-  absent type. A segment type repeating at multiple positions is otherwise fully
-  supported and common (research.md #2) — this limitation applies only when *that
-  specific type* is itself used as a parent, which no existing vector's parent side
-  ever is.
+- ~~Resolving an **ambiguous parent-side type**~~ — **closed by spec
+  `010-ambiguous-parent-resolution`**. `node_for` (data-model.md) still returns `None`
+  for this case and is still what's used for the unambiguous case (no regression),
+  but the caller (`execute_hierarchy`) now falls back to a history-dependent,
+  document-order-driven resolution (`resolve_occurrence_node`,
+  `crates/core/src/hierarchy.rs`) instead of treating that `None` as "no qualifying
+  children." See `specs/010-ambiguous-parent-resolution/contracts/
+  ambiguous-parent-resolution.md` for the full revised behavior — verified against
+  the real Scala engine's own output for this exact scenario (spec `010` research.md
+  #1), confirming this was a genuine gap relative to the Scala baseline, not merely a
+  missing nice-to-have.
 - Escape-sequence decoding of any extracted value — spec `1001`'s scope, unchanged
   from spec `007`'s existing boundary.
 - Any batch/streaming multi-message or multi-PATH API, or Arrow-oriented output —

@@ -70,5 +70,41 @@
     ],
     "expected_lines": [[9]],
     "semantic_rules": ["B.2-multi-level-navigation"]
+  },
+  {
+    "id": "hier-014",
+    "path": "OBX -> NTE-3",
+    "profile_ref": "profiles/deep-nested.json",
+    "message_ref": "messages/complex-hierarchy.hl7",
+    "method": "getValue",
+    "expected": [
+      ["Note attached to OBX-C, not to OBR directly"]
+    ],
+    "expected_lines": [[9]],
+    "semantic_rules": ["A.7-ambiguous-parent-resolution"]
+  },
+  {
+    "id": "hier-015",
+    "path": "OBX[2] -> NTE-3",
+    "profile_ref": "profiles/deep-nested.json",
+    "message_ref": "messages/complex-hierarchy.hl7",
+    "method": "getValue",
+    "expected": [
+      ["Note attached to OBX-C, not to OBR directly"]
+    ],
+    "expected_lines": [[9]],
+    "semantic_rules": ["A.7-ambiguous-parent-resolution", "A.4-cross-parent-child-indexing"]
+  },
+  {
+    "id": "hier-016",
+    "path": "SPM -> OBX-3",
+    "profile_ref": "profiles/deep-nested.json",
+    "message_ref": "messages/complex-hierarchy.hl7",
+    "method": "getValue",
+    "expected": [
+      ["OBX-UNDER-SPM-CODE^Nested Under SPM^LN"]
+    ],
+    "expected_lines": [[11]],
+    "semantic_rules": ["A.7-ambiguous-parent-resolution"]
   }
 ]

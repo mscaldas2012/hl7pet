@@ -80,6 +80,7 @@
           "A.4-cross-parent-child-indexing",
           "A.5-static-mode-fallback",
           "A.6-chained-arrow-silently-empty",
+          "A.7-ambiguous-parent-resolution",
           "B.2-multi-level-navigation"
         ]
       }
