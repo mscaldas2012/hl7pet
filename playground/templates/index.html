@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HL7-PET Playground</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <h1>HL7-PET Playground</h1>
+    <p class="subtitle">Paste a message, run a PATH, see what it matches.</p>
+  </header>
+
+  <main>
+    <form id="extract-form">
+      <div class="field">
+        <label for="message">HL7 message</label>
+        <textarea id="message" name="message" rows="12" placeholder="MSH|^~\&amp;|..." required></textarea>
+      </div>
+
+      <div class="field-row">
+        <div class="field field-path">
+          <label for="path">PATH</label>
+          <input id="path" name="path" type="text" placeholder="e.g. OBX-5 or OBR -> OBX-5" required>
+        </div>
+
+        <div class="field field-profile">
+          <label for="profile">Hierarchy profile <span class="optional">(optional — only needed for <code>-&gt;</code> PATHs)</span></label>
+          <input id="profile" name="profile" type="file" accept="application/json">
+        </div>
+      </div>
+
+      <button type="submit">Run PATH</button>
+    </form>
+
+    <section id="results" aria-live="polite"></section>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
