@@ -105,6 +105,45 @@ fn get_first_value(message: &str, path: &str) -> PyResult<Option<String>> {
     Ok(result.first().and_then(|reps| reps.first()).map(|s| s.to_string()))
 }
 
+/// Spec 011 `execute_hierarchy_located` counterpart. Same profile-handling
+/// as `get_value_hierarchy` (JSON re-serialization via the stdlib `json`
+/// module, `build_hierarchy` toggle), wrapping each value in the same
+/// `LocatedValue` type `get_value_located` already uses.
+#[pyfunction]
+#[pyo3(signature = (message, path, profile, build_hierarchy=true))]
+fn get_value_hierarchy_located(
+    py: Python<'_>,
+    message: &str,
+    path: &str,
+    profile: &Bound<'_, PyAny>,
+    build_hierarchy: bool,
+) -> PyResult<Option<Vec<Vec<LocatedValue>>>> {
+    let hierarchy_profile = if build_hierarchy {
+        let json_mod = py.import("json")?;
+        let profile_json: String = json_mod.call_method1("dumps", (profile,))?.extract()?;
+        Some(
+            hl7pet_core::HierarchyProfile::from_json(&profile_json)
+                .map_err(errors::profile_error)?,
+        )
+    } else {
+        None
+    };
+
+    let (scan, compiled) = compile(message, path)?;
+    let result = hl7pet_core::execute_hierarchy_located(&scan, &compiled, hierarchy_profile.as_ref())
+        .map_err(errors::query_error)?;
+    if result.is_empty() {
+        Ok(None)
+    } else {
+        Ok(Some(
+            result
+                .into_iter()
+                .map(|inner| inner.into_iter().map(LocatedValue::from).collect())
+                .collect(),
+        ))
+    }
+}
+
 /// Spec 1000 `execute_located` counterpart. Non-hierarchy PATHs only, the
 /// same scope `hl7pet-core` itself enforces for this method (FR-009).
 #[pyfunction]
@@ -156,6 +195,7 @@ fn _hl7pet(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<LocatedValue>()?;
     m.add_function(wrap_pyfunction!(get_value, m)?)?;
     m.add_function(wrap_pyfunction!(get_value_hierarchy, m)?)?;
+    m.add_function(wrap_pyfunction!(get_value_hierarchy_located, m)?)?;
     m.add_function(wrap_pyfunction!(get_first_value, m)?)?;
     m.add_function(wrap_pyfunction!(get_value_located, m)?)?;
     m.add_function(wrap_pyfunction!(get_first_value_located, m)?)?;

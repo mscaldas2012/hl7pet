@@ -25,6 +25,9 @@ Quickstart (FR-013)::
     profile = json.load(open("profile.json"))
     obs = hl7pet.get_value_hierarchy(message, "OBR[1] -> OBX-5", profile)
 
+    # Located hierarchy: pairs each hierarchy-matched value with its own line.
+    located_obs = hl7pet.get_value_hierarchy_located(message, "OBR[1] -> OBX-5", profile)
+
 Every extraction call returns ``None`` when nothing matches -- it never
 raises for "no data". A malformed message, an invalid PATH expression, a
 non-numeric filter comparison, or an invalid hierarchy profile each raise a
@@ -43,6 +46,7 @@ from ._hl7pet import (
     get_first_value_located,
     get_value,
     get_value_hierarchy,
+    get_value_hierarchy_located,
     get_value_located,
     get_values,
 )
@@ -58,6 +62,7 @@ __all__ = [
     "get_first_value_located",
     "get_value",
     "get_value_hierarchy",
+    "get_value_hierarchy_located",
     "get_value_located",
     "get_values",
 ]

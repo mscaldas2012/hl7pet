@@ -30,7 +30,7 @@ use std::collections::HashMap;
 use serde::Deserialize;
 
 use crate::parser::{CompiledPath, SegIndex};
-use crate::query::{self, QueryError};
+use crate::query::{self, LocatedValue, QueryError};
 use crate::scanner::{ScanResult, SegmentSpan};
 
 /// The executor's non-panic failure output for a malformed *profile* —
@@ -272,6 +272,11 @@ fn resolve_occurrence_node(scan: &ScanResult<'_>, profile: &HierarchyProfile, ta
 /// it isn't (spec 010). This function itself is unchanged either way: it
 /// has no opinion on *how* `parent_node` was resolved, only on what its
 /// direct children are.
+///
+/// Thin wrapper over [`direct_children_of_type_indexed`] (spec
+/// 011-located-hierarchy-api research.md #1) — discards the line each
+/// matched child carries, keeping this function's own signature and
+/// behavior byte-for-byte unchanged for its existing callers/tests.
 fn direct_children_of_type<'m>(
     scan: &ScanResult<'m>,
     profile: &HierarchyProfile,
@@ -279,6 +284,26 @@ fn direct_children_of_type<'m>(
     parent_node: usize,
     cseg: &str,
 ) -> Vec<SegmentSpan> {
+    direct_children_of_type_indexed(scan, profile, parent_span, parent_node, cseg)
+        .into_iter()
+        .map(|(_, span)| span)
+        .collect()
+}
+
+/// Same resolution as [`direct_children_of_type`], additionally pairing
+/// each returned child span with its 1-based line number (its position
+/// among all segments in `scan.segments`) — captured within this same
+/// single bounded forward scan, not a second one (spec
+/// 011-located-hierarchy-api research.md #1). `direct_children_of_type`
+/// delegates to this function so its own existing callers see no behavior
+/// change at all.
+fn direct_children_of_type_indexed<'m>(
+    scan: &ScanResult<'m>,
+    profile: &HierarchyProfile,
+    parent_span: SegmentSpan,
+    parent_node: usize,
+    cseg: &str,
+) -> Vec<(usize, SegmentSpan)> {
     let mut result = Vec::new();
     let ancestors = profile.ancestor_chain(parent_node);
 
@@ -290,14 +315,18 @@ fn direct_children_of_type<'m>(
 
     let mut stack = vec![parent_node];
 
-    for span in &scan.segments[parent_line + 1..] {
+    for (local_i, span) in scan.segments[parent_line + 1..].iter().enumerate() {
         let seg_type = scan.segment_name(span);
         loop {
             let top = *stack.last().expect("stack always has at least parent_node");
             if let Some(&child_idx) = profile.nodes[top].children.get(seg_type) {
                 stack.push(child_idx);
                 if stack.len() == 2 && seg_type == cseg {
-                    result.push(*span);
+                    // 1-based line, matching query::resolve_segment_candidates_indexed's
+                    // `i + 1` convention: this span's absolute 0-based index in
+                    // scan.segments is `parent_line + 1 + local_i`.
+                    let line = parent_line + 2 + local_i;
+                    result.push((line, *span));
                 }
                 break;
             } else if stack.len() > 1 {
@@ -328,11 +357,30 @@ fn direct_children_of_type<'m>(
 /// FR-007 (type-filtered and re-based *before* this call, per-parent, never
 /// combined across parents; 1-based here, matching every other `SEG_IDX` in
 /// the engine).
+///
+/// Thin wrapper over [`apply_child_index_indexed`] (spec
+/// 011-located-hierarchy-api research.md #1) — tags each input span with a
+/// placeholder line (unused by this selection logic) and strips it back out,
+/// keeping this function's own signature and behavior byte-for-byte
+/// unchanged for its existing caller.
 fn apply_child_index<'m>(
     scan: &ScanResult<'m>,
     candidates: Vec<SegmentSpan>,
     index: Option<&SegIndex<'_>>,
 ) -> Result<Vec<SegmentSpan>, QueryError> {
+    let indexed = candidates.into_iter().map(|span| (0, span)).collect();
+    Ok(apply_child_index_indexed(scan, indexed, index)?.into_iter().map(|(_, span)| span).collect())
+}
+
+/// Same `SEG_IDX` (`csegIdx`) selection as [`apply_child_index`], operating
+/// on and returning `(usize, SegmentSpan)` pairs so a child's line number
+/// survives selection (spec 011-located-hierarchy-api). `Filter` still
+/// evaluates only the span half of each pair.
+fn apply_child_index_indexed<'m>(
+    scan: &ScanResult<'m>,
+    candidates: Vec<(usize, SegmentSpan)>,
+    index: Option<&SegIndex<'_>>,
+) -> Result<Vec<(usize, SegmentSpan)>, QueryError> {
     match index {
         None | Some(SegIndex::Star) => Ok(candidates),
         Some(SegIndex::Numeric(n)) => {
@@ -346,9 +394,9 @@ fn apply_child_index<'m>(
         Some(SegIndex::Last) => Ok(candidates.last().copied().into_iter().collect()),
         Some(SegIndex::Filter(clause)) => {
             let mut selected = Vec::new();
-            for span in candidates {
+            for (line, span) in candidates {
                 if query::filter_matches(scan, &span, clause)? {
-                    selected.push(span);
+                    selected.push((line, span));
                 }
             }
             Ok(selected)
@@ -408,6 +456,70 @@ pub fn execute_hierarchy<'m>(
         let segment_name = scan.segment_name(span);
         let values =
             query::resolve_field_values(child.field.as_ref(), segment_content, segment_name, &scan.delimiters);
+        if !values.is_empty() {
+            result.push(values);
+        }
+    }
+
+    Ok(result)
+}
+
+/// Location-aware counterpart to [`execute_hierarchy`] (spec
+/// 011-located-hierarchy-api). Same preconditions and per-parent-occurrence
+/// bounded scan; for the same `scan`/`path`/`profile`, stripping every
+/// `LocatedValue.line` from this function's output reproduces
+/// `execute_hierarchy`'s output exactly
+/// (contracts/located-hierarchy-api.md). The line number comes from each
+/// matched child segment occurrence's own position in `scan.segments`
+/// (`direct_children_of_type_indexed`, research.md #1) — no second pass
+/// over the message or the segment list beyond what `execute_hierarchy`
+/// already performs. `LocatedValue.value` is decoded exactly like
+/// `execute_hierarchy`'s own output (spec 1001-escape-sequence-decoding).
+pub fn execute_hierarchy_located<'m>(
+    scan: &ScanResult<'m>,
+    path: &CompiledPath<'_>,
+    profile: Option<&HierarchyProfile>,
+) -> Result<Vec<Vec<LocatedValue<'m>>>, QueryError> {
+    let Some(child) = path.child.as_ref() else {
+        return query::execute_located(scan, path);
+    };
+    let Some(profile) = profile else {
+        return Ok(vec![]);
+    };
+
+    let parent_candidates =
+        query::resolve_segment_candidates(scan, path.segment.name, path.segment.index.as_ref())?;
+
+    let mut selected_children: Vec<(usize, SegmentSpan)> = Vec::new();
+    for parent_span in &parent_candidates {
+        let parent_type = scan.segment_name(parent_span);
+        // spec 010: an ambiguous parent type needs the message's real
+        // document order to resolve which position this specific occurrence
+        // occupies; an unambiguous one keeps today's O(1) lookup, byte-for-
+        // byte unchanged (FR-006).
+        let parent_node = if profile.is_ambiguous(parent_type) {
+            resolve_occurrence_node(scan, profile, *parent_span)
+        } else {
+            profile.node_for(parent_type)
+        };
+        let Some(parent_node) = parent_node else {
+            // Absent from the profile entirely, or (spec 010 FR-004) an
+            // ambiguous-type occurrence that doesn't correspond to any
+            // legal position given the real message structure -- no
+            // children, never an error.
+            continue;
+        };
+        let direct = direct_children_of_type_indexed(scan, profile, *parent_span, parent_node, child.segment.name);
+        let chosen = apply_child_index_indexed(scan, direct, child.segment.index.as_ref())?;
+        selected_children.extend(chosen);
+    }
+
+    let mut result = Vec::with_capacity(selected_children.len());
+    for (line, span) in &selected_children {
+        let segment_content = &scan.message[span.start..span.end];
+        let segment_name = scan.segment_name(span);
+        let values =
+            query::resolve_field_values_located(*line, child.field.as_ref(), segment_content, segment_name, &scan.delimiters);
         if !values.is_empty() {
             result.push(values);
         }
@@ -726,6 +838,166 @@ mod tests {
             allocs_with_unrelated_ambiguity, allocs_plain,
             "resolving an unambiguous parent type (OBR) must cost identically whether or not an unrelated \
              ambiguous type (OBX) exists elsewhere in the same profile"
+        );
+    }
+
+    // --- spec 011-located-hierarchy-api: execute_hierarchy_located ---
+
+    // US1 (T008): a `->` PATH matching exactly one child returns that
+    // child's value together with its own 1-based line number.
+    #[test]
+    fn execute_hierarchy_located_returns_single_match_value_and_line() {
+        let scan_result = crate::scanner::scan(COMPLEX_HIERARCHY_MESSAGE).unwrap();
+        let profile = HierarchyProfile::from_json(DEEP_NESTED_PROFILE).unwrap();
+        let compiled = crate::parser::parse("SPM -> OBX-3").unwrap();
+
+        let result = execute_hierarchy_located(&scan_result, &compiled, Some(&profile)).unwrap();
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].len(), 1);
+        assert_eq!(result[0][0].value.as_ref(), "OBX-UNDER-SPM-CODE^Nested Under SPM^LN");
+        assert_eq!(result[0][0].line, 11, "the SPM-nested OBX is the message's 11th segment");
+    }
+
+    // US1 (T009): every value produced from the same matched child
+    // occurrence shares that occurrence's own line (FR-004), even when a
+    // field expression yields more than one value (e.g. a repeated field).
+    #[test]
+    fn execute_hierarchy_located_shares_line_across_values_from_same_child() {
+        let message = "MSH|^~\\&|A|B\nOBR|1\nOBX|1|CE|Code||POS~NEG||||||F\n";
+        let scan_result = crate::scanner::scan(message).unwrap();
+        let profile =
+            HierarchyProfile::from_json(r#"{"segmentDefinition": {"OBR": {"children": {"OBX": {}}}}}"#).unwrap();
+        let compiled = crate::parser::parse("OBR[1] -> OBX-5").unwrap();
+
+        let result = execute_hierarchy_located(&scan_result, &compiled, Some(&profile)).unwrap();
+        assert_eq!(result.len(), 1, "one matched OBX occurrence");
+        assert_eq!(result[0].len(), 2, "OBX-5 has two repetitions: POS and NEG");
+        assert_eq!(result[0][0].value.as_ref(), "POS");
+        assert_eq!(result[0][1].value.as_ref(), "NEG");
+        assert_eq!(result[0][0].line, result[0][1].line, "both repetitions came from the same OBX occurrence");
+        assert_eq!(result[0][0].line, 3);
+    }
+
+    // US2 (T011): a `->` PATH matching children under more than one parent
+    // occurrence returns one LocatedValue group per matched child, each with
+    // its own line, flattened across parents in document order rather than
+    // nested by parent (research.md #3).
+    #[test]
+    fn execute_hierarchy_located_flattens_children_across_multiple_parents_with_own_lines() {
+        let message = "MSH|^~\\&|A|B\nOBR|1\nOBX|1\nOBR|2\nOBX|2\n";
+        let scan_result = crate::scanner::scan(message).unwrap();
+        let profile =
+            HierarchyProfile::from_json(r#"{"segmentDefinition": {"OBR": {"children": {"OBX": {}}}}}"#).unwrap();
+        let compiled = crate::parser::parse("OBR -> OBX-1").unwrap();
+
+        let result = execute_hierarchy_located(&scan_result, &compiled, Some(&profile)).unwrap();
+        assert_eq!(result.len(), 2, "one group per matched child, across both OBR occurrences");
+        assert_eq!(result[0][0].value.as_ref(), "1");
+        assert_eq!(result[0][0].line, 3, "first OBR's OBX is the message's 3rd segment");
+        assert_eq!(result[1][0].value.as_ref(), "2");
+        assert_eq!(result[1][0].line, 5, "second OBR's OBX is the message's 5th segment");
+    }
+
+    // US2 (T012): a child-side numeric SEG_IDX selects only that indexed
+    // child occurrence, with its own correct line.
+    #[test]
+    fn execute_hierarchy_located_applies_child_side_numeric_index_with_correct_line() {
+        let scan_result = crate::scanner::scan(COMPLEX_HIERARCHY_MESSAGE).unwrap();
+        let profile = HierarchyProfile::from_json(DEEP_NESTED_PROFILE).unwrap();
+        let compiled = crate::parser::parse("OBR[1] -> OBX[2]-3").unwrap();
+
+        let result = execute_hierarchy_located(&scan_result, &compiled, Some(&profile)).unwrap();
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0][0].value.as_ref(), "OBX-C-CODE^Direct Child C^LN");
+        assert_eq!(result[0][0].line, 8, "the second direct OBX child is the message's 8th segment");
+    }
+
+    // US3 (T014): a `->` PATH whose parent occurrence has no matching
+    // children returns an empty result, exactly mirroring
+    // execute_hierarchy's own empty-result shape.
+    #[test]
+    fn execute_hierarchy_located_returns_empty_when_parent_has_no_children() {
+        let scan_result = crate::scanner::scan(COMPLEX_HIERARCHY_MESSAGE).unwrap();
+        let profile = HierarchyProfile::from_json(DEEP_NESTED_PROFILE).unwrap();
+        let compiled = crate::parser::parse("OBR[2] -> OBX-3").unwrap();
+
+        let result = execute_hierarchy_located(&scan_result, &compiled, Some(&profile)).unwrap();
+        assert!(result.is_empty(), "OBR[2] has no children in COMPLEX_HIERARCHY_MESSAGE");
+    }
+
+    // US3 (T015): an ambiguous parent-side type resolves identically to the
+    // unambiguous case, with the correct line reported (spec 010).
+    #[test]
+    fn execute_hierarchy_located_resolves_ambiguous_parent_with_correct_line() {
+        let scan_result = crate::scanner::scan(COMPLEX_HIERARCHY_MESSAGE).unwrap();
+        let profile = HierarchyProfile::from_json(DEEP_NESTED_PROFILE).unwrap();
+        let compiled = crate::parser::parse("OBX -> NTE-3").unwrap();
+
+        let result = execute_hierarchy_located(&scan_result, &compiled, Some(&profile)).unwrap();
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0][0].value.as_ref(), "Note attached to OBX-C, not to OBR directly");
+        assert_eq!(result[0][0].line, 9);
+    }
+
+    // US3 (T016): no profile supplied yields no match, without a fabricated
+    // line -- mirrors execute_hierarchy_without_profile_is_empty exactly.
+    #[test]
+    fn execute_hierarchy_located_without_profile_is_empty() {
+        let message = "MSH|^~\\&|A|B\nOBR|1\nOBX|1\n";
+        let scan_result = crate::scanner::scan(message).unwrap();
+        let compiled = crate::parser::parse("OBR[1] -> OBX-1").unwrap();
+
+        let result = execute_hierarchy_located(&scan_result, &compiled, None).unwrap();
+        assert!(result.is_empty());
+    }
+
+    // Polish (T022): allocation count does not scale with unrelated message
+    // size -- SC-004's "no extra pass over the message" claim, mirroring
+    // spec 010's allocation-count precedent in this same module.
+    #[test]
+    fn execute_hierarchy_located_allocation_count_independent_of_unrelated_message_size() {
+        use crate::test_alloc::count_allocs;
+
+        let profile =
+            HierarchyProfile::from_json(r#"{"segmentDefinition": {"OBR": {"children": {"OBX": {}}}}}"#).unwrap();
+        let compiled = crate::parser::parse("OBR[1] -> OBX-1").unwrap();
+
+        // A second OBR (a sibling boundary) immediately after OBR[1]'s own
+        // single OBX child, then a large tail of OBX lines belonging to
+        // that *second* OBR -- never OBR[1]'s own count, and never the
+        // *parent* selector's own candidate count (still exactly two OBR
+        // occurrences regardless of tail size). This isolates this
+        // feature's own bounded per-parent-occurrence scan
+        // (direct_children_of_type_indexed's early exit at the sibling
+        // boundary, spec 008 research.md #1) from resolve_segment_candidates'
+        // pre-existing, unrelated cost of collecting every same-named
+        // parent candidate before applying a numeric SEG_IDX -- confirmed
+        // by a throwaway diagnostic to already scale identically for the
+        // existing (non-located) execute_hierarchy, so it is not this
+        // feature's concern to fix or to measure here. Mirrors
+        // `direct_children_of_type_ignores_lines_past_the_boundary_regardless_of_tail_size`'s
+        // exact message shape.
+        let small_message = "MSH|^~\\&|A|B\nOBR|1\nOBX|1\nOBR|2\n";
+        let mut large_message = String::from("MSH|^~\\&|A|B\nOBR|1\nOBX|1\nOBR|2\n");
+        for i in 0..2000 {
+            large_message.push_str(&format!("OBX|{i}\n"));
+        }
+
+        let small_scan = crate::scanner::scan(small_message).unwrap();
+        let large_scan = crate::scanner::scan(&large_message).unwrap();
+
+        let allocs_small = count_allocs(|| {
+            execute_hierarchy_located(&small_scan, &compiled, Some(&profile)).unwrap();
+        });
+        let allocs_large = count_allocs(|| {
+            execute_hierarchy_located(&large_scan, &compiled, Some(&profile)).unwrap();
+        });
+
+        assert_eq!(
+            allocs_small, allocs_large,
+            "execute_hierarchy_located's allocation count for OBR[1] -> OBX-1 must not scale with a large tail \
+             of segments past OBR[1]'s own sibling boundary -- only OBR[1]'s own single direct OBX child is ever \
+             selected either way"
         );
     }
 }

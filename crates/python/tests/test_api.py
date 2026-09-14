@@ -102,3 +102,29 @@ def test_get_value_hierarchy_with_build_hierarchy_false_returns_none():
 def test_get_value_hierarchy_raises_hl7_profile_error_on_invalid_profile_json():
     with pytest.raises(hl7pet.Hl7ProfileError):
         hl7pet.get_value_hierarchy(MULTI_OBX, "OBR[1] -> OBX-5", {"not": "a profile"})
+
+
+def test_get_value_hierarchy_located_pairs_value_with_source_line():
+    profile = {"segmentDefinition": {"OBR": {"children": {"OBX": {}}}}}
+    located = hl7pet.get_value_hierarchy_located(MULTI_OBX, "OBR[1] -> OBX-5", profile)
+    non_located = hl7pet.get_value_hierarchy(MULTI_OBX, "OBR[1] -> OBX-5", profile)
+
+    assert located is not None
+    assert [[lv.value for lv in group] for group in located] == non_located
+    for group in located:
+        for lv in group:
+            assert isinstance(lv.line, int)
+            assert lv.line >= 1
+
+
+def test_get_value_hierarchy_located_with_build_hierarchy_false_returns_none():
+    profile = {"segmentDefinition": {"OBR": {"children": {"OBX": {}}}}}
+    result = hl7pet.get_value_hierarchy_located(
+        MULTI_OBX, "OBR[1] -> OBX-5", profile, build_hierarchy=False
+    )
+    assert result is None
+
+
+def test_get_value_hierarchy_located_raises_hl7_profile_error_on_invalid_profile_json():
+    with pytest.raises(hl7pet.Hl7ProfileError):
+        hl7pet.get_value_hierarchy_located(MULTI_OBX, "OBR[1] -> OBX-5", {"not": "a profile"})
