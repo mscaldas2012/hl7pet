@@ -1,0 +1,110 @@
+# Contract: `hl7pet_arrow` Public API
+
+Package: `hl7pet_arrow` (own `maturin` wheel, `crates/arrow`, independent of
+the existing `hl7pet` package per plan.md's Structure Decision). Compiled
+extension module: `hl7pet_arrow._hl7pet_arrow` (PyO3, mirrors `crates/python`'s
+`_hl7pet` naming convention); re-exported from `hl7pet_arrow/__init__.py`.
+
+Every function below raises before touching any row's data — never
+mid-batch — for a call-level precondition violation (data-model.md): an
+invalid PATH, an empty PATH list, a hierarchy PATH with no profile, or an
+invalid profile JSON. These reuse the existing binding's typed exceptions
+(`Hl7PathError`, `Hl7ProfileError`), imported from `hl7pet` so callers
+already handling those exceptions elsewhere don't need a second exception
+hierarchy for the Arrow surface (Backward-Compatible Additions convention —
+this is additive reuse, not a new one).
+
+## `extract_value`
+
+```python
+def extract_value(
+    messages: pyarrow.Array,           # Utf8/LargeUtf8, nullable entries OK
+    path: str,
+    profile: dict | None = None,       # required iff `path` uses "->"
+) -> pyarrow.StructArray:              # one Result Struct per row (data-model.md)
+    ...
+```
+
+- **Given** a well-formed `messages` array and a non-hierarchy `path`,
+  **returns** a `StructArray` the same length as `messages`, one
+  `{value, status}` entry per row (spec Story 1, Acceptance Scenario 1).
+- **Given** a hierarchy-mode `path` (`->`) and a `profile`, **behaves**
+  identically except hierarchy-navigated per Story 1 Acceptance Scenario 2.
+- **Given** a hierarchy-mode `path` with `profile=None`, **raises**
+  `Hl7ProfileError` immediately (no partial row processing).
+- **Given** a syntactically invalid `path`, **raises** `Hl7PathError`
+  immediately.
+- **Given** a null entry in `messages` at row *i*, **produces**
+  `{value: null, status: "no_match"}` at row *i* — a missing message is
+  treated the same as "nothing to match against," not a scan failure,
+  since there is no message content to have failed to scan.
+
+## `extract_values`
+
+```python
+def extract_values(
+    messages: pyarrow.Array,
+    paths: list[str],                  # non-empty; duplicates allowed (spec Edge Cases)
+    profile: dict | None = None,       # required iff any path uses "->"
+) -> pyarrow.StructArray:              # struct-of-structs, one outer field per path
+    ...
+```
+
+- **Given** `paths = ["PID-5.1", "MSH-9"]`, **returns** a `StructArray`
+  with two top-level fields named `"PID-5.1"` and `"MSH-9"`, each an inner
+  Result Struct (data-model.md). A caller narrows to one field the same way
+  they'd narrow any Arrow/Spark struct column: `result.field("PID-5.1")`
+  (PyArrow) or `.select("result.`PID-5.1`")` (Spark, backtick-quoted since
+  a PATH string can contain characters that aren't bare identifiers).
+- **Given** `paths = []`, **raises** `ValueError` immediately (FR-008) —
+  a plain Python exception, not an `Hl7*Error`, since this is a Python-API
+  argument-shape violation with no `hl7pet-core` equivalent to mirror
+  (there is no "empty PATH list" concept inside `hl7pet-core` itself).
+- **Given** the same `path` string twice in `paths`, **returns** two
+  independent outer fields, both computed (spec Edge Cases) — field
+  *position*, not name uniqueness, is what a duplicate-safe caller should
+  rely on; `pyarrow.StructArray.field(i)` (positional) works even when two
+  fields share a name, `.field("name")` does not.
+- Every row across every requested `path` is derived from exactly one scan
+  of that row's message (SC-002) — this is an internal implementation
+  requirement, verified by `crates/arrow/tests/test_scan_count.py`, not
+  something the caller observes in the return shape.
+
+## `hl7pet_arrow.spark` (pure Python, Story 3)
+
+```python
+def extract_value_udf(
+    path: str,
+    profile: dict | None = None,
+) -> pyspark.sql.column.Column:
+    """Usable as df.withColumn("result", extract_value_udf("PID-5.1")(df["message"]))."""
+
+def extract_values_udf(
+    paths: list[str],
+    profile: dict | None = None,
+) -> pyspark.sql.column.Column:
+    """Usable as df.select(extract_values_udf(["PID-5.1", "MSH-9"])(df["message"]))."""
+```
+
+Both are thin factories: given the PATH(s)/profile at UDF-definition time
+(mirroring how a Spark UDF is always parameterized before being applied to
+a column, since PATHs aren't themselves DataFrame data), each returns an
+`arrow_udf`-decorated callable (research.md #4) closing over `hl7pet_arrow.
+extract_value`/`extract_values`. If the research.md #4 struct-output spike
+finds `arrow_udf` cannot return a `StructType` column in PySpark 4.2 today,
+`extract_values_udf` falls back to `DataFrame.mapInArrow` internally — a
+change to this file's implementation notes only, not to the two functions'
+signatures or return contract above.
+
+## Existing plain-binding exceptions reused here
+
+| Class | Raised by this API for |
+|---|---|
+| `hl7pet.Hl7PathError` | Syntactically invalid PATH (either function) |
+| `hl7pet.Hl7ProfileError` | Hierarchy PATH with missing/invalid profile |
+| `ValueError` (builtin) | Empty `paths` list (`extract_values` only) |
+
+Per-row structural failure (`hl7pet.Hl7ScanError`/`Hl7QueryError`'s
+call-level equivalents) is deliberately **not** in this table — it never
+raises in this API; it's the `status: "scan_error"` field per
+data-model.md's Result Struct (FR-010).
