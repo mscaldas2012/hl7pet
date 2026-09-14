@@ -3,7 +3,7 @@ pub mod parser;
 pub mod query;
 pub mod scanner;
 
-pub use hierarchy::{execute_hierarchy, HierarchyProfile, ProfileError};
+pub use hierarchy::{execute_hierarchy, execute_hierarchy_located, HierarchyProfile, ProfileError};
 pub use parser::{
     parse, ChildPath, CompiledPath, FieldExpr, FieldIndex, FilterClause, FilterOperator,
     ParseError, ParseErrorKind, SegIndex, SegmentExpr,

@@ -50,27 +50,6 @@ function render(data) {
 function renderResults(data) {
   resultsEl.className = "state-results";
 
-  if (data.hierarchy) {
-    const note = document.createElement("p");
-    note.className = "note";
-    note.textContent = "Line numbers aren't available for hierarchy PATHs yet.";
-    resultsEl.appendChild(note);
-
-    const list = document.createElement("ul");
-    list.className = "result-list";
-    data.results.forEach((value) => {
-      const li = document.createElement("li");
-      li.className = "result-row";
-      const valueEl = document.createElement("span");
-      valueEl.className = "result-value";
-      valueEl.textContent = value;
-      li.appendChild(valueEl);
-      list.appendChild(li);
-    });
-    resultsEl.appendChild(list);
-    return;
-  }
-
   const list = document.createElement("ul");
   list.className = "result-list";
   data.results.forEach((entry) => {

@@ -37,11 +37,21 @@ not one of `hl7pet`'s own outcomes).
 
 ### `status: "results"`, hierarchy PATH (profile supplied)
 
+~~Values only, no line numbers (FR-005a)~~ — **closed by
+spec `011-located-hierarchy-api`**: `hl7pet-core`/the Python binding gained a
+located-hierarchy entry point (`get_value_hierarchy_located`), so this branch
+now dispatches to it instead of the non-located `get_value_hierarchy`
+(`hl7_playground/extraction.py`) and returns the same `{"value", "line"}`
+shape as the non-hierarchy case:
+
 ```json
 {
   "status": "results",
   "hierarchy": true,
-  "results": ["Positive", "Negative"]
+  "results": [
+    {"value": "Positive", "line": 12},
+    {"value": "Negative", "line": 18}
+  ]
 }
 ```
 

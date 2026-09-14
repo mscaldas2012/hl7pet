@@ -38,6 +38,7 @@ Thumbs.db
 
 # --- Logs / env ---
 *.log
+*.pid
 .env
 .env.*
 !.env.example

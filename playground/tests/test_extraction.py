@@ -19,8 +19,8 @@ def test_non_hierarchy_path_dispatches_to_get_value_located(monkeypatch, multi_o
     )
     monkeypatch.setattr(
         hl7pet,
-        "get_value_hierarchy",
-        lambda *a, **k: pytest.fail("get_value_hierarchy should not be called"),
+        "get_value_hierarchy_located",
+        lambda *a, **k: pytest.fail("get_value_hierarchy_located should not be called"),
     )
 
     extract(multi_obx_message, "OBX-5", None)
@@ -28,7 +28,7 @@ def test_non_hierarchy_path_dispatches_to_get_value_located(monkeypatch, multi_o
     assert calls == [("located", multi_obx_message, "OBX-5")]
 
 
-def test_hierarchy_path_dispatches_to_get_value_hierarchy(monkeypatch, basic_hierarchy_message, basic_two_level_profile_bytes):
+def test_hierarchy_path_dispatches_to_get_value_hierarchy_located(monkeypatch, basic_hierarchy_message, basic_two_level_profile_bytes):
     calls = []
     monkeypatch.setattr(
         hl7pet,
@@ -37,7 +37,7 @@ def test_hierarchy_path_dispatches_to_get_value_hierarchy(monkeypatch, basic_hie
     )
     monkeypatch.setattr(
         hl7pet,
-        "get_value_hierarchy",
+        "get_value_hierarchy_located",
         lambda message, path, profile: calls.append(("hierarchy", message, path, profile)) or None,
     )
 

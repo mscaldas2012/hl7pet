@@ -32,7 +32,9 @@ def _located_results(message: str, path: str) -> dict:
 
 
 def _hierarchy_results(message: str, path: str, profile_file) -> dict:
-    """Hierarchy branch (research.md #3): values only, no line numbers (FR-005a)."""
+    """Hierarchy branch (research.md #3): line-numbered results, via
+    hl7pet-core's located-hierarchy API (spec 011-located-hierarchy-api,
+    which closed the FR-005a limitation this branch used to have)."""
     if profile_file is None:
         return {
             "status": "profile_required",
@@ -48,13 +50,17 @@ def _hierarchy_results(message: str, path: str, profile_file) -> dict:
     except json.JSONDecodeError as exc:
         return {"status": "profile_error", "message": f"Profile file is not valid JSON: {exc}"}
 
-    result = hl7pet.get_value_hierarchy(message, path, profile)
+    result = hl7pet.get_value_hierarchy_located(message, path, profile)
     if result is None:
         return {"status": "no_results"}
     return {
         "status": "results",
         "hierarchy": True,
-        "results": [value for occurrence in result for value in occurrence],
+        "results": [
+            {"value": located.value, "line": located.line}
+            for occurrence in result
+            for located in occurrence
+        ],
     }
 
 
