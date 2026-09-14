@@ -39,10 +39,10 @@ pytest tests/test_parity.py
 **Expected outcome**: every `fixtures/vectors/{path,hierarchy}/` vector,
 run through `extract_value` on a single-row `messages` array, produces a
 `status`/`value` pair matching what the existing plain `hl7pet.get_value`/
-`hl7pet.get_value_hierarchy` return for that same vector (an `Hl7PetError`
-raised by the plain binding maps to this test asserting `status ==
-"scan_error"`, not to a mismatch). Zero mismatches is the pass bar, mirroring
-spec `6000`'s `parity_check.py` precedent.
+`hl7pet.get_value_hierarchy` return for that same vector (an `Hl7ScanError`/
+`Hl7QueryError` raised by the plain binding maps to this test asserting
+`status == "error"`, not to a mismatch). Zero mismatches is the pass bar,
+mirroring spec `6000`'s `parity_check.py` precedent.
 
 ## 3. Confirm one scan per message regardless of PATH count (SC-002)
 

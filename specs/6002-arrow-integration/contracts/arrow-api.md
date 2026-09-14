@@ -12,7 +12,15 @@ invalid profile JSON. These reuse the existing binding's typed exceptions
 (`Hl7PathError`, `Hl7ProfileError`), imported from `hl7pet` so callers
 already handling those exceptions elsewhere don't need a second exception
 hierarchy for the Arrow surface (Backward-Compatible Additions convention —
-this is additive reuse, not a new one).
+this is additive reuse, not a new one). This makes `hl7pet` (spec `6000`'s
+package, the `crates/python` wheel) a **runtime Python dependency of
+`hl7pet_arrow`**, declared in `crates/arrow/pyproject.toml`'s `dependencies`
+(plan.md Primary Dependencies) — not a Cargo dependency, since
+`crates/python` builds a `cdylib` with no `lib`/`rlib` output for another
+Rust crate to link against. `hl7pet_arrow`'s Rust code obtains the exception
+type objects the same way `crates/python`'s own `get_value_hierarchy`
+already imports the stdlib `json` module — `py.import("hl7pet")?` at the
+PyO3 boundary, not a Rust-level type reference.
 
 ## `extract_value`
 
@@ -36,8 +44,8 @@ def extract_value(
   immediately.
 - **Given** a null entry in `messages` at row *i*, **produces**
   `{value: null, status: "no_match"}` at row *i* — a missing message is
-  treated the same as "nothing to match against," not a scan failure,
-  since there is no message content to have failed to scan.
+  treated the same as "nothing to match against," not an error, since
+  there is no message content to have failed to scan.
 
 ## `extract_values`
 
@@ -106,5 +114,5 @@ signatures or return contract above.
 
 Per-row structural failure (`hl7pet.Hl7ScanError`/`Hl7QueryError`'s
 call-level equivalents) is deliberately **not** in this table — it never
-raises in this API; it's the `status: "scan_error"` field per
-data-model.md's Result Struct (FR-010).
+raises in this API; it's the `status: "error"` field per data-model.md's
+Result Struct (FR-010).

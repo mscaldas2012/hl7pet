@@ -125,7 +125,10 @@ machinery than a simple scalar column-in/column-out call needs.
 **Decision**: Both mechanisms return a **result struct** per requested
 PATH — `{value: List<List<Utf8>>, status: Utf8}` — rather than a bare
 value array plus a side-channel, and rather than raising. `status` is one
-of `"ok"` / `"no_match"` / `"scan_error"`. Single-PATH extraction returns
+of `"ok"` / `"no_match"` / `"error"` (named generically rather than
+`"scan_error"` since it also covers a per-row `Hl7QueryError`-equivalent
+failure, not scan failures alone — see data-model.md). Single-PATH
+extraction returns
 one such struct (itself a single `pa.Array`, satisfying spec FR-001 — a
 `StructArray` is one Arrow array); multi-PATH extraction returns a
 struct-of-structs, one outer field per requested PATH, each an inner

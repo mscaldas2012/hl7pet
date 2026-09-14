@@ -35,7 +35,16 @@ mirrors).
 - Python (consumer/demo side only — `hl7pet-core` itself gains no new
   dependency, preserving the Dependency policy): `pyarrow>=18` (PySpark
   4.2's own stated minimum), `pyspark==4.2.0`, `maturin>=1.7,<2.0` (already
-  used by `crates/python`), `jupyter`/`ipykernel` for the demo notebook.
+  used by `crates/python`), `jupyter`/`ipykernel` for the demo notebook, and
+  **`hl7pet`** (spec `6000`'s package) — `hl7pet_arrow` reuses its
+  `Hl7PathError`/`Hl7ProfileError` exception types for call-level
+  precondition failures (contracts/arrow-api.md) rather than defining a
+  parallel exception hierarchy, so it depends on that package directly
+  (declared in `crates/arrow/pyproject.toml`'s `dependencies`), imported at
+  the PyO3 boundary via `py.import("hl7pet")` the same way `crates/python`
+  itself already imports the stdlib `json` module — not a Cargo/Rust-level
+  dependency, since `crates/python` builds a `cdylib` with no `lib`/`rlib`
+  output another crate could link against.
 
 **Storage**: N/A — no persistence; this feature operates entirely on
 in-memory Arrow data passed through a function call.
@@ -169,7 +178,8 @@ crates/
 ├── xtask/                         # unchanged
 └── arrow/                         # NEW — hl7pet-arrow
     ├── Cargo.toml                 # depends on hl7pet-core (path) + arrow + pyo3 + pyo3-arrow
-    ├── pyproject.toml             # maturin mixed layout, mirrors crates/python/pyproject.toml
+    ├── pyproject.toml             # maturin mixed layout, mirrors crates/python/pyproject.toml;
+    │                               # [project.dependencies] includes hl7pet (exception reuse, see contracts/arrow-api.md)
     ├── src/
     │   ├── lib.rs                 # #[pymodule]: extract_value, extract_values
     │   ├── convert.rs             # hl7pet-core LocatedValue/Vec<Vec<Cow<str>>> -> Arrow builders

@@ -48,7 +48,7 @@ Struct<
                                  (message document order), inner = field
                                  repetitions -- identical nesting to the
                                  existing plain binding's list[list[str]]
-  status: Utf8               -- one of "ok" | "no_match" | "scan_error"
+  status: Utf8               -- one of "ok" | "no_match" | "error"
 >
 ```
 
@@ -56,19 +56,21 @@ Struct<
 |---|---|---|---|
 | `"ok"` | non-null, non-empty | PATH matched >=1 occurrence | `get_value(...)` returns a non-empty list |
 | `"no_match"` | `null` | Row scanned fine; PATH matched nothing | `get_value(...)` returns `None` |
-| `"scan_error"` | `null` | Row's message failed to scan (e.g. missing/truncated MSH) | `get_value(...)` would have raised `Hl7ScanError` |
+| `"error"` | `null` | Row could not be evaluated — message failed to scan (e.g. missing/truncated MSH), or a filter applied an ordering operator to a non-numeric operand | `get_value(...)` would have raised `Hl7ScanError`/`Hl7QueryError` |
 
 A non-scan structural failure that the existing binding also surfaces as an
 exception for a *single* call — `Hl7PathError` (bad PATH), `Hl7ProfileError`
 (bad profile) — is **not** a per-row `status` value, because both are
 call-level preconditions already rejected eagerly above (FR-008/FR-009),
 before any row's `status` is computed. `Hl7QueryError` (non-numeric filter
-comparison) *is* per-row like `scan_error`, since it depends on a
-particular row's field content, not the PATH/profile alone — folded into
-`"scan_error"` rather than adding a fourth status value, since both
+comparison) *is* per-row like a scan failure, since it depends on a
+particular row's field content, not the PATH/profile alone — both fold into
+the single `"error"` status rather than adding a fourth value, since both
 represent "this row could not be evaluated" from the caller's perspective;
 distinguishing the two sub-cases further is not required by any spec FR and
-would only add cases a caller has to handle for no behavioral gain.
+would only add cases a caller has to handle for no behavioral gain. Named
+`"error"` rather than `"scan_error"` precisely because it already covers
+more than scan failures.
 
 ### Single-PATH extraction output (Story 1 / FR-001)
 
