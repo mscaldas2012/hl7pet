@@ -16,10 +16,24 @@ pip install -r playground/requirements.txt
 ## Run
 
 ```bash
-flask --app playground.app run
+flask --app playground.app run --port 8080
 ```
 
-Open `http://localhost:5000` in a browser.
+Open `http://localhost:8080` in a browser. **Avoid port 5000**: on macOS it's
+also claimed by ControlCenter/AirPlay Receiver (on both IPv4 and IPv6), and
+since Flask only binds IPv4, a browser that resolves `localhost` to IPv6
+first will silently land on AirPlay Receiver instead of this app — you'll get
+a `403` that has nothing to do with `hl7pet` or Flask.
+
+Or use the bounce script, which stops any running instance (tracked by
+`playground/.bounce.pid`) and starts a fresh one in the background, logging to
+`playground/.bounce.log`:
+
+```bash
+playground/bounce.sh              # restart on the default port (8080)
+playground/bounce.sh --port 5051  # restart on a different port
+playground/bounce.sh --stop-only  # just stop, don't restart
+```
 
 ## Test
 
@@ -32,8 +46,8 @@ cd playground && pytest
 - Paste a raw HL7 v2 message and a PATH expression → see every matching value,
   each with its 1-based source line number.
 - Optionally upload a hierarchy profile (`segmentDefinition` JSON) to run `->`
-  PATHs. Hierarchy results show values only — no line numbers yet (a documented
-  limitation, see spec.md FR-005a).
+  PATHs — results show line numbers too, via spec `011-located-hierarchy-api`'s
+  `get_value_hierarchy_located`.
 - Nothing submitted is persisted; every request is self-contained.
 
 See `specs/9000-playground-webapp/quickstart.md` for a full manual validation

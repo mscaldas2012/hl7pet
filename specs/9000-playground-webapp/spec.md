@@ -126,10 +126,15 @@ readable error message and the app remains usable afterward.
   evaluate that PATH against that message and display every matching value.
 - **FR-005**: Each displayed matching value for a non-hierarchy PATH MUST be annotated
   with the 1-based source line number of the segment occurrence it came from.
-- **FR-005a**: Results for a hierarchy (`->`) PATH MUST display matched values without
+- ~~**FR-005a**: Results for a hierarchy (`->`) PATH MUST display matched values without
   line numbers, and the system MUST show an explicit, visible note that line-numbered
   results are not yet available for hierarchy PATHs (a documented limitation, not a
-  silent omission — see Constitution Principle V). A future feature may close this gap.
+  silent omission — see Constitution Principle V). A future feature may close this gap.~~
+  **Closed by spec `011-located-hierarchy-api`**: `hl7pet-core`/the Python binding gained
+  `execute_hierarchy_located`/`get_value_hierarchy_located`, so the playground now
+  dispatches hierarchy PATHs through that entry point and displays line numbers exactly
+  like non-hierarchy results (`hl7_playground/extraction.py`); the "not yet available"
+  note is removed from the UI.
 - **FR-006**: Results MUST be shown in message order and MUST fully replace prior
   results on every new submission (no accumulation of stale results).
 - **FR-007**: When a PATH matches nothing in the message, the system MUST display an
@@ -162,9 +167,9 @@ readable error message and the app remains usable afterward.
 - **PATH Expression (input)**: The query string a user enters, addressing a segment,
   field, component, subcomponent, filter, or hierarchy child-path within the message.
 - **Result Set (output)**: The ordered list of matched values produced by evaluating a
-  PATH against a message (and, when relevant, a profile). For a non-hierarchy PATH each
-  entry pairs a value with its 1-based source line number; for a hierarchy PATH entries
-  are values only, with no line number (FR-005a).
+  PATH against a message (and, when relevant, a profile). Every entry, hierarchy or not,
+  pairs a value with its 1-based source line number (FR-005; FR-005a's original
+  hierarchy exception closed by spec `011-located-hierarchy-api`).
 
 ## Success Criteria *(mandatory)*
 
@@ -173,9 +178,10 @@ readable error message and the app remains usable afterward.
 - **SC-001**: A user with no prior exposure to the tool can paste a sample message,
   enter a valid PATH, and see correctly line-numbered results within their first
   attempt, with no external documentation.
-- **SC-002**: For every matched value the app displays for a non-hierarchy PATH, the
-  reported line number exactly matches the segment occurrence the value was extracted
-  from. Hierarchy PATH results are excluded from this criterion per FR-005a.
+- **SC-002**: For every matched value the app displays — hierarchy or non-hierarchy PATH
+  alike (the hierarchy exclusion this criterion originally had per FR-005a was closed by
+  spec `011-located-hierarchy-api`) — the reported line number exactly matches the
+  segment occurrence the value was extracted from.
 - **SC-003**: A user who submits a hierarchy PATH without a profile understands, from
   the app's response alone, that a profile is needed — without consulting outside
   documentation.

@@ -45,7 +45,7 @@ def test_hierarchy_path_without_profile_requires_one(client, basic_hierarchy_mes
     assert "profile" in body["message"].lower()
 
 
-def test_hierarchy_path_with_profile_returns_values_without_line_numbers(
+def test_hierarchy_path_with_profile_returns_located_results(
     client, basic_hierarchy_message, basic_two_level_profile_bytes
 ):
     resp = client.post(
@@ -61,8 +61,8 @@ def test_hierarchy_path_with_profile_returns_values_without_line_numbers(
     body = resp.get_json()
     assert body["status"] == "results"
     assert body["hierarchy"] is True
-    assert body["results"] == ["POS", "NEG", "POS", "NEG"]
-    assert all(isinstance(v, str) for v in body["results"])
+    assert all(isinstance(entry, dict) and "value" in entry and "line" in entry for entry in body["results"])
+    assert [entry["value"] for entry in body["results"]] == ["POS", "NEG", "POS", "NEG"]
 
 
 # --- User Story 3 (P3): bad input handling ---
