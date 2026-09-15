@@ -6,6 +6,9 @@
 A high-performance, zero-copy HL7 v2 query engine — a Rust core with first-class
 Python and Java bindings and native Apache Arrow output.
 
+See [PRD.md](PRD.md) for the full product requirements (problem statement, target
+users, goals/non-goals, and success metrics).
+
 > **Status**: this repository is in the spec-driven planning phase. There is no
 > Rust, Python, or Java code here yet — what exists today is the formal
 > specification, architecture plan, and constitution for a ground-up rewrite of
