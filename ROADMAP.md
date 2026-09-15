@@ -98,8 +98,9 @@ Next spec in this module starts at **6003**.
 | #    | Short name           | Scope |
 |------|-----------------------|-------|
 | 9000 | `playground-webapp`  | Minimalistic devtool/demo web app: paste a raw HL7 message, optionally supply a hierarchy profile, enter a PATH, and see all matching results annotated with 1-based source line numbers (reusing spec `1000`'s located-extraction line-number metadata). Not part of any core migration phase. |
+| 9001 | `wheel-release-pipeline` | Backlog, not yet specced. CI-driven release pipeline (`maturin-action` in GitHub Actions) building and publishing pre-built wheels for both `crates/python` (`hl7pet`) and `crates/arrow` (`hl7pet_arrow`): `manylinux_2_17` x86_64/aarch64, macOS arm64/x86_64, Windows x86_64 -- one wheel per platform thanks to `abi3-py39`, not per Python minor version -- plus an sdist fallback for platforms not covered. Motivated by spec `6002`'s own finding: `hl7pet_arrow` as built today (`maturin develop`, debug, macOS-ARM64-only) cannot run on a real multi-node Spark cluster's (almost certainly Linux) executors. Scope boundary: this spec covers producing and publishing the wheels; actually distributing a wheel onto a specific cluster's executor nodes (init scripts, `conda-pack`/`venv-pack`, a custom image) remains the consumer's own infra responsibility, not covered here. |
 
-Next spec in this module starts at **9001**.
+Next spec in this module starts at **9002**.
 
 ## Conventions
 
