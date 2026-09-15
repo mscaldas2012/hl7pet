@@ -7,4 +7,10 @@ contract. `hl7pet_arrow.spark` provides PySpark DataFrame column wiring
 installed and standalone PyArrow usage should not.
 """
 
-# T013/T019 add extract_value/extract_values re-exports here.
+from ._hl7pet_arrow import extract_value
+
+__all__ = [
+    "extract_value",
+]
+
+# T019 adds extract_values here.
