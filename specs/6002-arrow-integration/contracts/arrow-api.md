@@ -175,6 +175,29 @@ finds `arrow_udf` cannot return a `StructType` column in PySpark 4.2 today,
 change to this file's implementation notes only, not to the two functions'
 signatures or return contract above.
 
+**Post-6002-merge addition**: `first_value_udf`/`values_udf`/
+`first_values_udf` are the Spark-facing counterparts of
+`hl7pet_arrow.simplify`, closing over `simplify.first_value`/`values`
+inside the `arrow_udf` body instead of returning the raw Result Struct:
+
+```python
+def first_value_udf(path: str, profile: dict | None = None) -> pyspark.sql.column.Column:
+    """Plain flat `string` column. Usable as
+    df.withColumn("MSH_12", first_value_udf("MSH-12")(df["message"]))."""
+
+def values_udf(path: str, profile: dict | None = None) -> pyspark.sql.column.Column:
+    """Plain `array<array<string>>` column, status dropped."""
+
+def first_values_udf(paths: list[str], profile: dict | None = None) -> pyspark.sql.column.Column:
+    """Struct of plain `string` fields, one per PATH (not one Result Struct
+    per PATH) -- `.select("result.*")` after this gives one flat column per
+    requested PATH directly, no struct navigation. Requires distinct
+    `paths`, same reason as `extract_values_udf`."""
+```
+
+All three collapse `"no_match"`/`"error"` to `null` uniformly, matching
+`hl7pet_arrow.simplify` itself.
+
 ## Existing plain-binding exceptions reused here
 
 | Class | Raised by this API for |

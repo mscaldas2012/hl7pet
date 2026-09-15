@@ -133,6 +133,22 @@ Spark struct type with one named field per PATH, which requires distinct
 field names -- unlike the standalone `extract_values`, it does not support
 duplicate PATHs.
 
+For a **plain** column with no struct navigation needed on the Spark side
+-- the `hl7pet_arrow.simplify` helpers, wired directly into the UDF:
+
+```python
+df.withColumn("MSH_12", has.first_value_udf("MSH-12")(df["message"]))   # flat string column
+df.withColumn("OBX_5", has.values_udf("OBX-5")(df["message"]))          # array<array<string>> column
+
+# One plain string column per PATH in a single call:
+wide = df.select(has.first_values_udf(["MSH-12", "PID-5.1"])(df["message"]).alias("result"))
+wide.select("result.*")   # -> a DataFrame with plain MSH-12 and PID-5.1 columns
+```
+
+Same `null`-for-`"no_match"`/`"error"` collapsing as `hl7pet_arrow.simplify`
+itself, and the same distinct-PATHs requirement as `extract_values_udf` for
+`first_values_udf`.
+
 ## Testing
 
 ```bash
