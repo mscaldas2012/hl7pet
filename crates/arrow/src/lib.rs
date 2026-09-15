@@ -14,8 +14,6 @@ mod convert;
 mod errors;
 mod result_schema;
 
-use std::borrow::Cow;
-
 use arrow::array::Array;
 use pyo3::prelude::*;
 
@@ -88,10 +86,7 @@ fn extract_one<'m>(
     scanned: Option<&Result<hl7pet_core::ScanResult<'m>, hl7pet_core::ScanError>>,
     compiled: &hl7pet_core::CompiledPath<'_>,
     profile: Option<&hl7pet_core::HierarchyProfile>,
-) -> (
-    Option<Vec<Vec<Cow<'m, str>>>>,
-    result_schema::RowStatus,
-) {
+) -> result_schema::RowOutcome<'m> {
     match scanned {
         None => (None, result_schema::RowStatus::NoMatch),
         Some(Err(_)) => (None, result_schema::RowStatus::Error),
@@ -175,8 +170,8 @@ fn extract_rows_for_paths<'m>(
     messages: impl Iterator<Item = Option<&'m str>>,
     compiled_paths: &[hl7pet_core::CompiledPath<'_>],
     profile: Option<&hl7pet_core::HierarchyProfile>,
-) -> Vec<Vec<(Option<Vec<Vec<Cow<'m, str>>>>, result_schema::RowStatus)>> {
-    let mut per_path_outcomes: Vec<Vec<(Option<Vec<Vec<Cow<'m, str>>>>, result_schema::RowStatus)>> =
+) -> Vec<Vec<result_schema::RowOutcome<'m>>> {
+    let mut per_path_outcomes: Vec<Vec<result_schema::RowOutcome<'m>>> =
         (0..compiled_paths.len()).map(|_| Vec::new()).collect();
 
     for message in messages {
@@ -219,7 +214,7 @@ fn extract_values(
 
     let fields_and_arrays: Vec<(arrow::datatypes::FieldRef, arrow::array::ArrayRef)> = paths
         .iter()
-        .zip(per_path_outcomes.into_iter())
+        .zip(per_path_outcomes)
         .map(|(path, outcomes)| {
             let inner = result_schema::build_result_struct_array(outcomes);
             let field = std::sync::Arc::new(arrow::datatypes::Field::new(
@@ -249,6 +244,7 @@ fn _hl7pet_arrow(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::borrow::Cow;
 
     const BASELINE_MESSAGE: &str = include_str!("../../../fixtures/messages/baseline.hl7");
 

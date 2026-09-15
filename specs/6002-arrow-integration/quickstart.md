@@ -9,11 +9,16 @@ where everything lives.
 
 ```bash
 python3 -m venv .venv-arrow && source .venv-arrow/bin/activate
-pip install maturin pyarrow>=18 pytest
+pip install maturin "pyarrow>=18" pytest
+
+# hl7pet_arrow depends on hl7pet at the Python level (contracts/arrow-api.md's
+# exception-reuse design) -- build it into the same venv first.
+(cd crates/python && maturin develop)
 
 cd crates/arrow
 maturin develop           # builds hl7pet-core + hl7pet-arrow, installs
                            # the `hl7pet_arrow` package into the active venv
+cd ../..
 ```
 
 **Expected outcome**:
@@ -46,16 +51,20 @@ mirroring spec `6000`'s `parity_check.py` precedent.
 
 ## 3. Confirm one scan per message regardless of PATH count (SC-002)
 
+Delivered as Rust unit tests rather than a `.py` file (tasks.md T021):
+Python has no visibility into internal `hl7pet_core::scan` call counts, so
+the real production code path is exercised directly instead.
+
 ```bash
-cd crates/arrow
-pytest tests/test_scan_count.py
+cargo test -p hl7pet-arrow --lib scan
 ```
 
-**Expected outcome**: `extract_values` with N paths against the same
-message column reports the same per-message scan count as `extract_value`
-with 1 path (a `cfg(test)`-only instrumented counting build, mirroring the
-counting-allocator pattern already used by specs `009`/`1000`/`011`) — the
-test fails if requesting more PATHs ever re-scans a message.
+**Expected outcome**: `extract_rows_for_paths` (the shared loop both
+`extract_value` and `extract_values` call) scans each message exactly once
+regardless of how many PATHs are requested — a `thread_local!` instrumented
+counter (`crates/core/src/test_alloc.rs`'s exact counting-allocator
+pattern, specs `005`/`006`'s SC-004 precedent) proves it directly; the test
+fails if requesting more PATHs ever re-scans a message.
 
 ## 4. Run the PySpark wiring smoke test (Story 3)
 
@@ -75,9 +84,11 @@ Acceptance Scenario 4 / Story 3).
 ## 5. Run the demo notebook end-to-end (Story 4, FR-011, SC-005)
 
 ```bash
-pip install jupyter ipykernel
-jupyter nbconvert --to notebook --execute notebooks/arrow_pyspark_demo.ipynb \
-  --output /tmp/arrow_pyspark_demo.out.ipynb
+pip install jupyter ipykernel nbconvert
+cd notebooks
+jupyter nbconvert --to notebook --execute arrow_pyspark_demo.ipynb \
+  --output /tmp/arrow_pyspark_demo.out.ipynb --ExecutePreprocessor.timeout=120
+cd ..
 ```
 
 **Expected outcome**: exits `0`, every cell executes without error. The

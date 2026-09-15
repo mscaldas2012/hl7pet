@@ -22,13 +22,14 @@ fn hl7pet_exception(py: Python<'_>, class_name: &str, msg: String) -> PyErr {
         .import("hl7pet")
         .and_then(|module| module.getattr(class_name))
     {
-        Ok(class) => PyErr::from_value(class.call1((msg,)).unwrap_or_else(|_| {
+        Ok(class) => {
             // Constructing the exception instance itself should never fail
             // for a plain string argument; fall back to the class object so
             // `raise` still produces *some* `hl7pet.<class_name>`-typed
             // error rather than panicking.
-            class
-        })),
+            let instance = class.call1((msg,)).unwrap_or(class);
+            PyErr::from_value(instance)
+        }
         Err(_) => PyImportError::new_err(format!(
             "hl7pet_arrow requires the 'hl7pet' package to be installed \
              (needed for {class_name}): {msg}"

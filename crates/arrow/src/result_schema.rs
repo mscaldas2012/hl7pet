@@ -31,14 +31,15 @@ impl RowStatus {
     }
 }
 
+/// One requested PATH's per-row outcome: `None` whenever the paired
+/// `RowStatus != RowStatus::Ok`; `Some(rows)` carries the matched segment
+/// occurrences (outer `Vec`) and field repetitions (inner `Vec`),
+/// identical nesting to the plain `hl7pet` binding's `list[list[str]]`.
+pub(crate) type RowOutcome<'m> = (Option<Vec<Vec<Cow<'m, str>>>>, RowStatus);
+
 /// Builds one Result Struct array from a per-row outcome list, in row
-/// order. `outcomes[i].0` is `None` whenever `outcomes[i].1 != RowStatus::Ok`;
-/// `Some(rows)` carries the matched segment occurrences (outer `Vec`) and
-/// field repetitions (inner `Vec`), identical nesting to the plain `hl7pet`
-/// binding's `list[list[str]]`.
-pub(crate) fn build_result_struct_array<'m>(
-    outcomes: Vec<(Option<Vec<Vec<Cow<'m, str>>>>, RowStatus)>,
-) -> StructArray {
+/// order.
+pub(crate) fn build_result_struct_array<'m>(outcomes: Vec<RowOutcome<'m>>) -> StructArray {
     let mut value_builder: ListBuilder<ListBuilder<StringBuilder>> =
         ListBuilder::new(ListBuilder::new(StringBuilder::new()));
     let mut status_builder = StringBuilder::new();

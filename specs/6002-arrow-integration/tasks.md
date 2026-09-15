@@ -162,9 +162,9 @@ Independent Test for US4).
 package, and run the full regression suite alongside this feature's new
 tests.
 
-- [ ] T031 [P] Write `crates/arrow/README.md` (mirrors `crates/python/README.md`'s Install/Quickstart/Testing structure): install via `maturin develop`, the `extract_value`/`extract_values`/`hl7pet_arrow.spark` quickstart snippets from `contracts/arrow-api.md`, and a link to `specs/6002-arrow-integration/contracts/arrow-api.md` for the full contract.
-- [ ] T032 Run `cargo clippy --workspace --all-targets` and confirm clean, including the new `hl7pet-arrow` crate; run `cargo test --workspace` and confirm the full pre-existing suite (specs `005`-`1001`, `6000`-`6001`) passes unmodified alongside this feature's new tests (spec.md FR-004/SC-003).
-- [ ] T033 Execute every step of [quickstart.md](quickstart.md) manually end-to-end (build, parity, scan-count, Spark, notebook) and confirm each documented "Expected outcome" holds.
+- [X] T031 [P] Write `crates/arrow/README.md` (mirrors `crates/python/README.md`'s Install/Quickstart/Testing structure): install via `maturin develop`, the `extract_value`/`extract_values`/`hl7pet_arrow.spark` quickstart snippets from `contracts/arrow-api.md`, and a link to `specs/6002-arrow-integration/contracts/arrow-api.md` for the full contract.
+- [X] T032 Run `cargo clippy --workspace --all-targets` and confirm clean, including the new `hl7pet-arrow` crate; run `cargo test --workspace` and confirm the full pre-existing suite (specs `005`-`1001`, `6000`-`6001`) passes unmodified alongside this feature's new tests (spec.md FR-004/SC-003).
+- [X] T033 Execute every step of [quickstart.md](quickstart.md) manually end-to-end (build, parity, scan-count, Spark, notebook) and confirm each documented "Expected outcome" holds.
 - [ ] T034 Update `ROADMAP.md`'s spec `6002` Status row from "Draft" to "Implemented" with a summary of what shipped (mirroring specs `6000`/`6001`/`011`'s entries' level of detail), noting which of T001/T024's two flagged spikes needed their fallback (if either did) and updating the Language Bindings module's "Next free" if applicable.
 
 ---
