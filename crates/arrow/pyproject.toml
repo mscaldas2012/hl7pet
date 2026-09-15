@@ -1,0 +1,19 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "hl7pet_arrow"
+version = "0.1.0"
+description = "Apache Arrow / PyArrow / PySpark integration for hl7pet-core."
+requires-python = ">=3.9"
+dependencies = ["hl7pet"]
+classifiers = [
+  "Programming Language :: Rust",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+
+[tool.maturin]
+module-name = "hl7pet_arrow._hl7pet_arrow"
+python-source = "python"
+features = ["pyo3/extension-module"]
