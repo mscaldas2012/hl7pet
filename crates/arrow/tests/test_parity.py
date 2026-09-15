@@ -155,3 +155,73 @@ def test_extract_value_matches_the_full_fixtures_corpus():
 
     not_implemented = {r["vector_id"] for r in report["results"] if r["status"] == "not_implemented"}
     assert not_implemented == KNOWN_NOT_IMPLEMENTED
+
+
+def _eligible_path_vectors() -> list[dict[str, Any]]:
+    """Every `path` family vector `_check_path_vector` would score `match`
+    on via a plain (non-INVALID, non-ERROR) comparison -- the vectors
+    `extract_values` can be meaningfully compared against `extract_value`
+    for."""
+    eligible = []
+    for vector in _load_vectors("path"):
+        path = vector["path"]
+        expected = vector["expected"]
+        if " -> " in path or vector["method"] != "getValue":
+            continue
+        if expected in ("INVALID", "ERROR:NonNumericComparison"):
+            continue
+        eligible.append(vector)
+    return eligible
+
+
+def test_extract_values_agrees_with_extract_value_for_paths_sharing_a_message():
+    """Story 2 Acceptance Scenario 1: every outer field of an
+    `extract_values` call matches what `extract_value` alone returns for
+    that same path -- not just that multi-PATH extraction runs."""
+    by_message: dict[str, list[dict[str, Any]]] = {}
+    for vector in _eligible_path_vectors():
+        by_message.setdefault(vector["message_ref"], []).append(vector)
+
+    groups = [vectors for vectors in by_message.values() if len(vectors) >= 2]
+    assert groups, "expected at least one message_ref shared by 2+ eligible vectors"
+
+    for vectors in groups:
+        message = _read_message(vectors[0]["message_ref"])
+        messages = pa.array([message])
+        paths = [v["path"] for v in vectors]
+
+        multi = ha.extract_values(messages, paths)
+        for i, vector in enumerate(vectors):
+            single = _row(messages, vector["path"])
+            combined = multi.field(i)[0].as_py()
+            assert combined == single, (vector["id"], combined, single)
+            # Also matches the vector's own recorded expectation directly.
+            assert combined["value"] == (vector["expected"] or None)
+
+
+def test_extract_values_rejects_empty_paths_list():
+    """FR-008 / Story 2 Acceptance Scenario 3: an empty paths list is
+    rejected up front, no row processed -- a plain ValueError, not an
+    Hl7*Error (contracts/arrow-api.md, no hl7pet-core equivalent to
+    mirror)."""
+    message = _read_message("messages/baseline.hl7")
+    try:
+        ha.extract_values(pa.array([message]), [])
+    except ValueError as e:
+        assert "paths must not be empty" in str(e)
+    else:
+        raise AssertionError("expected ValueError for an empty paths list")
+
+
+def test_extract_values_computes_duplicate_paths_independently():
+    """spec.md Edge Cases: the same PATH string twice in `paths` produces
+    two independent outer fields, both computed -- accessed positionally
+    (`.field(i)`), since PyArrow's own `to_pylist()`/dict conversion
+    refuses a StructArray with duplicate field names (contracts/
+    arrow-api.md's documented access pattern)."""
+    message = _read_message("messages/baseline.hl7")
+    result = ha.extract_values(pa.array([message]), ["MSH-12", "MSH-12"])
+    assert result.type.num_fields == 2
+    first = result.field(0)[0].as_py()
+    second = result.field(1)[0].as_py()
+    assert first == second == {"value": [["2.5.1"]], "status": "ok"}
