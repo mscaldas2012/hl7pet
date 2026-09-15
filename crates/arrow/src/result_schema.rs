@@ -11,8 +11,10 @@
 use std::borrow::Cow;
 use std::sync::Arc;
 
-use arrow::array::{ArrayRef, ListBuilder, StringBuilder, StructArray};
-use arrow::datatypes::Field;
+use arrow::array::{
+    ArrayRef, ArrayBuilder, ListBuilder, StringBuilder, StructArray, StructBuilder, UInt64Builder,
+};
+use arrow::datatypes::{DataType, Field, Fields};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub(crate) enum RowStatus {
@@ -76,4 +78,84 @@ pub(crate) fn build_result_struct_array<'m>(outcomes: Vec<RowOutcome<'m>>) -> St
     ));
 
     StructArray::from(vec![(value_field, value_array), (status_field, status_array)])
+}
+
+/// One matched segment occurrence in a **located** result: its field
+/// repetitions (`value`, possibly more than one for a repeating field) and
+/// the single 1-based source line all of them share -- `hl7pet-core`'s own
+/// `LocatedValue` already guarantees every repetition within one occurrence
+/// carries the same line, so this folds that redundancy away rather than
+/// reproducing it per repetition.
+pub(crate) struct LocatedOccurrence<'m> {
+    pub(crate) value: Vec<Cow<'m, str>>,
+    pub(crate) line: u64,
+}
+
+/// One requested PATH's per-row outcome, located variant: `None` whenever
+/// the paired `RowStatus != RowStatus::Ok`; `Some(occurrences)` is one
+/// entry per matched segment occurrence, in message order.
+pub(crate) type LocatedRowOutcome<'m> = (Option<Vec<LocatedOccurrence<'m>>>, RowStatus);
+
+/// Builds one **located** Result Struct array from a per-row outcome list,
+/// in row order: `{values: List<Struct<value: List<Utf8>, line: UInt64>>,
+/// status: Utf8}` (data-model.md's located extension -- `line` lives once
+/// per occurrence, not once per repetition, since repetitions within an
+/// occurrence always share it).
+pub(crate) fn build_located_result_struct_array<'m>(
+    outcomes: Vec<LocatedRowOutcome<'m>>,
+) -> StructArray {
+    let occurrence_fields = Fields::from(vec![
+        Field::new(
+            "value",
+            DataType::List(Arc::new(Field::new("item", DataType::Utf8, true))),
+            false,
+        ),
+        Field::new("line", DataType::UInt64, false),
+    ]);
+    let occurrence_field_builders: Vec<Box<dyn ArrayBuilder>> = vec![
+        Box::new(ListBuilder::new(StringBuilder::new())),
+        Box::new(UInt64Builder::new()),
+    ];
+    let occurrence_builder = StructBuilder::new(occurrence_fields.clone(), occurrence_field_builders);
+    let mut values_builder: ListBuilder<StructBuilder> = ListBuilder::new(occurrence_builder);
+    let mut status_builder = StringBuilder::new();
+
+    for (occurrences, status) in &outcomes {
+        match occurrences {
+            Some(occurrences) => {
+                let occurrence_builder = values_builder.values();
+                for occurrence in occurrences {
+                    let reps = occurrence_builder
+                        .field_builder::<ListBuilder<StringBuilder>>(0)
+                        .expect("field 0 is the `value` ListBuilder<StringBuilder>");
+                    for repetition in &occurrence.value {
+                        reps.values().append_value(repetition.as_ref());
+                    }
+                    reps.append(true);
+
+                    let line = occurrence_builder
+                        .field_builder::<UInt64Builder>(1)
+                        .expect("field 1 is the `line` UInt64Builder");
+                    line.append_value(occurrence.line);
+
+                    occurrence_builder.append(true);
+                }
+                values_builder.append(true);
+            }
+            None => values_builder.append(false),
+        }
+        status_builder.append_value(status.as_str());
+    }
+
+    let values_array: ArrayRef = Arc::new(values_builder.finish());
+    let status_array: ArrayRef = Arc::new(status_builder.finish());
+
+    let values_field = Arc::new(Field::new("values", values_array.data_type().clone(), true));
+    let status_field = Arc::new(Field::new(
+        "status",
+        status_array.data_type().clone(),
+        false,
+    ));
+
+    StructArray::from(vec![(values_field, values_array), (status_field, status_array)])
 }

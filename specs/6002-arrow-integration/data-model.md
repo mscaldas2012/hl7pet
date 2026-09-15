@@ -96,6 +96,63 @@ Every input row is scanned exactly once regardless of how many outer
 fields are requested (SC-002) — the per-PATH results are all derived from
 that one scan before being packed into the struct-of-structs.
 
+## Located Result Struct (output) — post-6002-merge addition
+
+Not part of the original spec.md/FR set; added after `extract_value`/
+`extract_values` shipped, pairing each matched occurrence with its
+1-based source line (mirroring `hl7pet-core`'s existing `LocatedValue`,
+specs `1000`/`011`). Same `status` semantics as the plain Result Struct
+above (`"ok"`/`"no_match"`/`"error"`, same triggers) — only the per-match
+payload differs:
+
+```text
+Struct<
+  values: List<
+    Struct<
+      value: List<Utf8>   -- one entry per field repetition (>=1)
+      line:  UInt64        -- 1-based; one per occurrence, shared by every
+                               repetition in it
+    >
+  >                         -- one entry per matched segment occurrence
+                               (message document order); null iff
+                               status != "ok"
+  status: Utf8
+>
+```
+
+Deliberately **not** structurally parallel to the plain Result Struct's
+`List<List<Utf8>>` (which would require either duplicating `line` onto
+every repetition, or an awkward struct-at-every-leaf that duplicates it
+just the same). `hl7pet-core`'s `execute_located`/`execute_hierarchy_located`
+return `Vec<Vec<LocatedValue>>` — outer = occurrences, inner = repetitions,
+each repetition individually carrying a `line` — and a dedicated test
+(`crates/core/src/query.rs`'s
+`execute_located_values_from_same_occurrence_share_one_line`) already
+proves every repetition within one occurrence carries the *same* line, so
+this shape folds that redundancy away at the Arrow boundary rather than
+reproducing it: one `line` per occurrence, paired with the full array of
+that occurrence's repetition values.
+
+Single-PATH (`extract_value_located`) and multi-PATH
+(`extract_values_located`) outputs follow the same "one struct per row" /
+"struct-of-structs, one scan per message" shapes as the plain
+`extract_value`/`extract_values` (above), just with this Located Result
+Struct as the per-row/per-path unit instead.
+
+## Plain-column outputs (`hl7pet_arrow.simplify`) — post-6002-merge addition
+
+Not a new Arrow entity — pure `pyarrow` projections of the existing (plain,
+non-located) Result Struct, with no new Rust/PyO3 surface:
+
+- `values(result)` = `result.field("value")` — the `List<List<Utf8>>`
+  column alone, `status` dropped.
+- `first_value(result)` = the first repetition of the first occurrence, as
+  a flat `Utf8` column (`pyarrow.compute.list_element` applied twice,
+  null-safe at both nesting levels).
+
+Both collapse `"no_match"` and `"error"` to `null` uniformly — a caller
+who needs FR-010's distinction uses the Result Struct directly instead.
+
 ## Demo Notebook (artifact, not runtime data)
 
 `notebooks/arrow_pyspark_demo.ipynb` — not a data entity, listed here only

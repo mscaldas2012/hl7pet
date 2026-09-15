@@ -234,10 +234,140 @@ fn extract_values(
     Ok(unbound)
 }
 
+/// Located counterpart of `extract_one`: dispatches to
+/// `hl7pet_core::execute_located`/`execute_hierarchy_located` instead of
+/// `execute`/`execute_hierarchy`, mapping the result through
+/// `convert::located_row_outcome`. Shared by `extract_value_located` and
+/// `extract_values_located` the same way `extract_one` is shared by their
+/// non-located counterparts.
+fn extract_one_located<'m>(
+    scanned: Option<&Result<hl7pet_core::ScanResult<'m>, hl7pet_core::ScanError>>,
+    compiled: &hl7pet_core::CompiledPath<'_>,
+    profile: Option<&hl7pet_core::HierarchyProfile>,
+) -> result_schema::LocatedRowOutcome<'m> {
+    match scanned {
+        None => (None, result_schema::RowStatus::NoMatch),
+        Some(Err(_)) => (None, result_schema::RowStatus::Error),
+        Some(Ok(scan)) => {
+            let result = if compiled.child.is_some() {
+                hl7pet_core::execute_hierarchy_located(scan, compiled, profile)
+            } else {
+                hl7pet_core::execute_located(scan, compiled)
+            };
+            convert::located_row_outcome(result)
+        }
+    }
+}
+
+/// Single-PATH extraction over a column of messages, pairing each matched
+/// occurrence with its 1-based source line (specs `1000`/`011`'s
+/// `LocatedValue`, brought to the columnar surface). See
+/// contracts/arrow-api.md.
+#[pyfunction]
+#[pyo3(signature = (messages, path, profile=None))]
+fn extract_value_located(
+    py: Python<'_>,
+    messages: pyo3_arrow::PyArray,
+    path: &str,
+    profile: Option<&Bound<'_, PyAny>>,
+) -> PyResult<Py<PyAny>> {
+    let compiled = validate_path(py, path, profile)?;
+    let hierarchy_profile = build_hierarchy_profile(py, compiled.child.is_some(), profile)?;
+
+    let mut outcomes = Vec::with_capacity(messages.array().len());
+    for message in convert::messages_iter(messages.array().as_ref())? {
+        let scanned = scan_message(message);
+        outcomes.push(extract_one_located(
+            scanned.as_ref(),
+            &compiled,
+            hierarchy_profile.as_ref(),
+        ));
+    }
+
+    let struct_array = result_schema::build_located_result_struct_array(outcomes);
+    let py_array = pyo3_arrow::PyArray::from_array_ref(std::sync::Arc::new(struct_array));
+    let bound = py_array.to_pyarrow(py)?;
+    let unbound = bound.unbind();
+    Ok(unbound)
+}
+
+/// Located counterpart of `extract_rows_for_paths`: same one-scan-per-message
+/// structure (SC-002), located outcomes.
+fn extract_rows_for_paths_located<'m>(
+    messages: impl Iterator<Item = Option<&'m str>>,
+    compiled_paths: &[hl7pet_core::CompiledPath<'_>],
+    profile: Option<&hl7pet_core::HierarchyProfile>,
+) -> Vec<Vec<result_schema::LocatedRowOutcome<'m>>> {
+    let mut per_path_outcomes: Vec<Vec<result_schema::LocatedRowOutcome<'m>>> =
+        (0..compiled_paths.len()).map(|_| Vec::new()).collect();
+
+    for message in messages {
+        let scanned = scan_message(message);
+        for (compiled, outcomes) in compiled_paths.iter().zip(per_path_outcomes.iter_mut()) {
+            outcomes.push(extract_one_located(scanned.as_ref(), compiled, profile));
+        }
+    }
+
+    per_path_outcomes
+}
+
+/// Multi-PATH extraction over a column of messages, located variant of
+/// `extract_values` -- same one-scan-per-message guarantee (SC-002), same
+/// struct-of-structs shape, each inner struct now the located Result
+/// Struct instead of the plain one. See contracts/arrow-api.md.
+#[pyfunction]
+#[pyo3(signature = (messages, paths, profile=None))]
+fn extract_values_located(
+    py: Python<'_>,
+    messages: pyo3_arrow::PyArray,
+    paths: Vec<String>,
+    profile: Option<&Bound<'_, PyAny>>,
+) -> PyResult<Py<PyAny>> {
+    if paths.is_empty() {
+        return Err(errors::empty_paths_error());
+    }
+
+    let compiled_paths: Vec<hl7pet_core::CompiledPath<'_>> = paths
+        .iter()
+        .map(|p| validate_path(py, p, profile))
+        .collect::<PyResult<_>>()?;
+    let needs_profile = compiled_paths.iter().any(|c| c.child.is_some());
+    let hierarchy_profile = build_hierarchy_profile(py, needs_profile, profile)?;
+
+    let per_path_outcomes = extract_rows_for_paths_located(
+        convert::messages_iter(messages.array().as_ref())?,
+        &compiled_paths,
+        hierarchy_profile.as_ref(),
+    );
+
+    let fields_and_arrays: Vec<(arrow::datatypes::FieldRef, arrow::array::ArrayRef)> = paths
+        .iter()
+        .zip(per_path_outcomes)
+        .map(|(path, outcomes)| {
+            let inner = result_schema::build_located_result_struct_array(outcomes);
+            let field = std::sync::Arc::new(arrow::datatypes::Field::new(
+                path.as_str(),
+                inner.data_type().clone(),
+                false,
+            ));
+            let array: arrow::array::ArrayRef = std::sync::Arc::new(inner);
+            (field, array)
+        })
+        .collect();
+
+    let struct_of_structs = arrow::array::StructArray::from(fields_and_arrays);
+    let py_array = pyo3_arrow::PyArray::from_array_ref(std::sync::Arc::new(struct_of_structs));
+    let bound = py_array.to_pyarrow(py)?;
+    let unbound = bound.unbind();
+    Ok(unbound)
+}
+
 #[pymodule]
 fn _hl7pet_arrow(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(pyo3::wrap_pyfunction!(extract_value, m)?)?;
     m.add_function(pyo3::wrap_pyfunction!(extract_values, m)?)?;
+    m.add_function(pyo3::wrap_pyfunction!(extract_value_located, m)?)?;
+    m.add_function(pyo3::wrap_pyfunction!(extract_values_located, m)?)?;
     Ok(())
 }
 
@@ -338,5 +468,59 @@ mod tests {
 
         assert_eq!(scans_for_one_path, 2);
         assert_eq!(scans_for_four_paths, scans_for_one_path);
+    }
+
+    // A null message row is "no_match" in the located path too, mirroring
+    // `extract_one`'s own FR-007 handling.
+    #[test]
+    fn located_null_message_row_is_no_match_not_error() {
+        let scanned = scan_message(None);
+        let compiled = hl7pet_core::parse("MSH-12").expect("valid path");
+        let (values, status) = extract_one_located(scanned.as_ref(), &compiled, None);
+        assert!(values.is_none());
+        assert_eq!(status, result_schema::RowStatus::NoMatch);
+    }
+
+    // A malformed message maps to "error" in the located path too.
+    #[test]
+    fn located_malformed_message_row_is_error() {
+        let scanned = scan_message(Some("not an hl7 message"));
+        let compiled = hl7pet_core::parse("MSH-12").expect("valid path");
+        let (values, status) = extract_one_located(scanned.as_ref(), &compiled, None);
+        assert!(values.is_none());
+        assert_eq!(status, result_schema::RowStatus::Error);
+    }
+
+    // A matching PATH reports one LocatedOccurrence per matched segment,
+    // each carrying its own 1-based line.
+    #[test]
+    fn located_matching_path_reports_line_per_occurrence() {
+        let scanned = scan_message(Some(BASELINE_MESSAGE));
+        let compiled = hl7pet_core::parse("MSH-12").expect("valid path");
+        let (values, status) = extract_one_located(scanned.as_ref(), &compiled, None);
+        assert_eq!(status, result_schema::RowStatus::Ok);
+        let values = values.expect("status Ok implies Some");
+        assert_eq!(values.len(), 1);
+        assert_eq!(values[0].value, vec![Cow::Borrowed("2.5.1")]);
+        assert_eq!(values[0].line, 1); // MSH is always the first line
+    }
+
+    // A repeating field within one occurrence: multiple repetitions in
+    // `value`, one shared `line` -- proves the fold in
+    // `convert::located_row_outcome` doesn't lose repetitions, and that
+    // `hl7pet-core`'s own "same occurrence shares one line" guarantee
+    // (query.rs's `execute_located_values_from_same_occurrence_share_one_line`)
+    // is exactly what makes collapsing to one `line` per occurrence safe.
+    #[test]
+    fn located_repeating_field_shares_one_line_across_repetitions() {
+        const REPETITION_MESSAGE: &str =
+            include_str!("../../../fixtures/messages/multi-repetition.hl7");
+        let scanned = scan_message(Some(REPETITION_MESSAGE));
+        let compiled = hl7pet_core::parse("OBX-5").expect("valid path");
+        let (values, status) = extract_one_located(scanned.as_ref(), &compiled, None);
+        assert_eq!(status, result_schema::RowStatus::Ok);
+        let values = values.expect("status Ok implies Some");
+        assert_eq!(values.len(), 1, "one occurrence");
+        assert_eq!(values[0].value, vec![Cow::Borrowed("IgG"), Cow::Borrowed("IgM")]);
     }
 }

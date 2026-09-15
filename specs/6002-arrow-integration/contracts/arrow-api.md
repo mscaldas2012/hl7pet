@@ -78,6 +78,77 @@ def extract_values(
   requirement, verified by `crates/arrow/tests/test_scan_count.py`, not
   something the caller observes in the return shape.
 
+## `extract_value_located` / `extract_values_located`
+
+Post-6002-merge addition, not in the original spec.md — located
+counterparts of `extract_value`/`extract_values`, mirroring the plain
+binding's `get_value_located`/`get_value_hierarchy_located` (specs
+`1000`/`011`) the same way the non-located pair mirrors `get_value`/
+`get_value_hierarchy`. Identical signatures, call-level precondition
+behavior (raises before any row is touched, same exceptions table below),
+and `status` semantics as `extract_value`/`extract_values` — the only
+difference is the per-row payload shape:
+
+```python
+def extract_value_located(
+    messages: pyarrow.Array,
+    path: str,
+    profile: dict | None = None,
+) -> pyarrow.StructArray:              # {values, status} per row -- see below
+
+def extract_values_located(
+    messages: pyarrow.Array,
+    paths: list[str],
+    profile: dict | None = None,
+) -> pyarrow.StructArray:              # struct-of-structs, one {values, status} per path
+```
+
+Located Result Struct shape (data-model.md's located extension):
+
+```text
+Struct<
+  values: List<
+    Struct<
+      value: List<Utf8>   -- non-empty; one entry per field repetition
+      line:  UInt64        -- 1-based; shared by every repetition in this occurrence
+    >
+  >                         -- one entry per matched segment occurrence; null iff status != "ok"
+  status: Utf8
+>
+```
+
+`line` lives once per occurrence, not once per repetition — every
+repetition within one segment occurrence provably shares it
+(`hl7pet-core`'s own guarantee: `crates/core/src/query.rs`'s
+`execute_located_values_from_same_occurrence_share_one_line` test), so
+storing it per repetition would be pure redundancy. `extract_values_located`
+has the identical duplicate-PATH/field-position behavior as
+`extract_values` (spec Edge Cases).
+
+## `hl7pet_arrow.simplify` (pure Python, no new native code)
+
+Post-6002-merge addition. Plain-column helpers over `extract_value`/
+`extract_values`' Result Struct output, for a caller who doesn't need the
+`status`/no-match-vs-error distinction:
+
+```python
+def values(result: pyarrow.StructArray) -> pyarrow.Array:
+    """result.field("value") -- List<List<Utf8>>, status dropped."""
+
+def first_value(result: pyarrow.StructArray) -> pyarrow.Array:
+    """Flat Utf8: first repetition of first occurrence."""
+```
+
+Both accept any Result Struct array — `extract_value(...)`'s direct
+output, or one field of `extract_values(...)`'s struct-of-structs
+(`multi_result.field(path_or_index)`). Both collapse `"no_match"` and
+`"error"` rows to `null` uniformly (matching `get_first_value`'s own
+null-for-absence convention) — this is a deliberate simplification, not an
+oversight; a caller who needs to tell the two apart uses `extract_value`/
+`extract_values` directly. Not applicable to the located Result Struct
+shape (`extract_value_located`'s `values` field is a different shape,
+`List<Struct<value, line>>`, not `List<List<Utf8>>`).
+
 ## `hl7pet_arrow.spark` (pure Python, Story 3)
 
 ```python
@@ -103,6 +174,29 @@ finds `arrow_udf` cannot return a `StructType` column in PySpark 4.2 today,
 `extract_values_udf` falls back to `DataFrame.mapInArrow` internally — a
 change to this file's implementation notes only, not to the two functions'
 signatures or return contract above.
+
+**Post-6002-merge addition**: `first_value_udf`/`values_udf`/
+`first_values_udf` are the Spark-facing counterparts of
+`hl7pet_arrow.simplify`, closing over `simplify.first_value`/`values`
+inside the `arrow_udf` body instead of returning the raw Result Struct:
+
+```python
+def first_value_udf(path: str, profile: dict | None = None) -> pyspark.sql.column.Column:
+    """Plain flat `string` column. Usable as
+    df.withColumn("MSH_12", first_value_udf("MSH-12")(df["message"]))."""
+
+def values_udf(path: str, profile: dict | None = None) -> pyspark.sql.column.Column:
+    """Plain `array<array<string>>` column, status dropped."""
+
+def first_values_udf(paths: list[str], profile: dict | None = None) -> pyspark.sql.column.Column:
+    """Struct of plain `string` fields, one per PATH (not one Result Struct
+    per PATH) -- `.select("result.*")` after this gives one flat column per
+    requested PATH directly, no struct navigation. Requires distinct
+    `paths`, same reason as `extract_values_udf`."""
+```
+
+All three collapse `"no_match"`/`"error"` to `null` uniformly, matching
+`hl7pet_arrow.simplify` itself.
 
 ## Existing plain-binding exceptions reused here
 
