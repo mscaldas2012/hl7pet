@@ -9,7 +9,7 @@ use arrow::array::{Array, LargeStringArray, StringArray};
 use pyo3::exceptions::PyTypeError;
 use pyo3::PyResult;
 
-use crate::result_schema::RowStatus;
+use crate::result_schema::{LocatedOccurrence, RowStatus};
 
 /// Maps one requested PATH's `hl7pet_core::execute`/`execute_hierarchy`
 /// result for an already-scanned message to a Result Struct outcome
@@ -24,6 +24,33 @@ pub(crate) fn row_outcome<'m>(
         Err(_) => (None, RowStatus::Error),
         Ok(rows) if rows.is_empty() => (None, RowStatus::NoMatch),
         Ok(rows) => (Some(rows), RowStatus::Ok),
+    }
+}
+
+/// Located counterpart of [`row_outcome`]: maps `hl7pet_core::execute_located`/
+/// `execute_hierarchy_located`'s per-repetition `LocatedValue`s into one
+/// [`LocatedOccurrence`] per matched segment occurrence, folding away the
+/// redundant per-repetition line (`hl7pet-core` already guarantees every
+/// repetition within one occurrence shares it -- verified, not assumed:
+/// `crates/core/src/query.rs`'s own
+/// `execute_located_values_from_same_occurrence_share_one_line` test).
+pub(crate) fn located_row_outcome<'m>(
+    execute_result: Result<Vec<Vec<hl7pet_core::LocatedValue<'m>>>, hl7pet_core::QueryError>,
+) -> (Option<Vec<LocatedOccurrence<'m>>>, RowStatus) {
+    match execute_result {
+        Err(_) => (None, RowStatus::Error),
+        Ok(rows) if rows.is_empty() => (None, RowStatus::NoMatch),
+        Ok(rows) => {
+            let occurrences = rows
+                .into_iter()
+                .map(|repetitions| {
+                    let line = repetitions.first().map(|lv| lv.line as u64).unwrap_or(0);
+                    let value = repetitions.into_iter().map(|lv| lv.value).collect();
+                    LocatedOccurrence { value, line }
+                })
+                .collect();
+            (Some(occurrences), RowStatus::Ok)
+        }
     }
 }
 
